@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Eat Meh',
-      // home: Bar(),
+      theme: ThemeData(fontFamily: "Poppins"),
       initialRoute: '/', // Default route
       routes: {
         '/': (context) => Bar(), // Home Page
