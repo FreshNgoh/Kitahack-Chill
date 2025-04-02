@@ -12,6 +12,7 @@ class NutritionScreen extends StatefulWidget {
 class _NutritionScreenState extends State<NutritionScreen> {
   bool _showCookSection = false;
   bool _showRestaurantSection = false;
+  bool _isImageConfirmed = false;
 
   File? _selectedImage;
 
@@ -68,11 +69,17 @@ class _NutritionScreenState extends State<NutritionScreen> {
             const SizedBox(height: 30),
             _buildNutrientRow(),
             _buildActionButtons(),
-            const SizedBox(height: 20),
-            if (_showCookSection) ...{
-              _buildIngredientsSection(),
-              _buildUploadButton(),
-            },
+            const SizedBox(height: 15),
+            if (_showCookSection) ...[
+              _selectedImage == null
+                  ? Column(
+                    children: [
+                      _buildIngredientsSection(),
+                      _buildUploadButton(),
+                    ],
+                  )
+                  : _buildImagePreviewSection(),
+            ],
             if (_showRestaurantSection) ...{_buildRestaurantSection()},
           ],
         ),
@@ -310,13 +317,64 @@ class _NutritionScreenState extends State<NutritionScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 20),
-        _selectedImage != null
-            ? Image.file(_selectedImage!, height: 150, fit: BoxFit.cover)
-            : const Text(
-              "Please select an image",
-              style: TextStyle(color: Colors.grey),
+      ],
+    );
+  }
+
+  Widget _buildImagePreviewSection() {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.topRight,
+          children: [
+            Container(
+              height: 150,
+              width: 350,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: FileImage(_selectedImage!),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
+            SizedBox(
+              height: 30,
+              width: 30,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                onPressed: () {
+                  setState(() {
+                    _selectedImage = null;
+                    _isImageConfirmed = false;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              _isImageConfirmed = true;
+            });
+          },
+          child: const Text(
+            'Confirm',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ],
     );
   }
