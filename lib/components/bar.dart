@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/pages/home.dart';
 
 class Bar extends StatelessWidget {
   const Bar({super.key});
@@ -12,7 +13,7 @@ class Bar extends StatelessWidget {
         appBar: AppBar(
           title: Align(
             alignment: Alignment.centerLeft,
-            child: const Text("Hi, Username"), //replace
+            child: const Text("Welcome Back, {Username}"), //replace
           ),
           // backgroundColor: Colors.black,
           actions: [
@@ -66,7 +67,7 @@ class Bar extends StatelessWidget {
         // Change the view page
         body: const TabBarView(
           children: <Widget>[
-            Center(child: Text("Home")),
+            NutritionScreen(),
             Center(child: Text("Friend")),
             Center(child: Text("Camera")),
             Center(child: Text("Avatar")),
