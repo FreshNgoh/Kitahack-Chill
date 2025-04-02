@@ -69,7 +69,7 @@ class Bar extends StatelessWidget {
           ],
         ),
         // Change the view page
-        body: const TabBarView(
+        body: TabBarView(
           children: <Widget>[
             NutritionScreen(),
             FriendPage(),
