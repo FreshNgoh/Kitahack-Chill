@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/pages/avatar_page.dart';
+import 'package:flutter_application/pages/camera_page.dart';
+import 'package:flutter_application/pages/friend_page.dart';
 import 'package:flutter_application/pages/home.dart';
+import 'package:flutter_application/pages/profile_page.dart';
 
 class Bar extends StatelessWidget {
   const Bar({super.key});
@@ -68,10 +72,10 @@ class Bar extends StatelessWidget {
         body: const TabBarView(
           children: <Widget>[
             NutritionScreen(),
-            Center(child: Text("Friend")),
-            Center(child: Text("Camera")),
-            Center(child: Text("Avatar")),
-            Center(child: Text("Profile")),
+            FriendPage(),
+            CameraPage(),
+            AvatarPage(),
+            ProfilePage(),
           ],
         ),
       ),
