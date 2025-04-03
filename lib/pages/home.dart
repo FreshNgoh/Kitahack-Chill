@@ -1,5 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/bloc/chat_bloc_bloc.dart';
+import 'package:flutter_application/pages/recipe_suggestion.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 class NutritionScreen extends StatefulWidget {
@@ -64,9 +67,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 15),
             _buildCalorieCard(),
-            const SizedBox(height: 30),
+            const SizedBox(height: 25),
             _buildNutrientRow(),
             _buildActionButtons(),
             const SizedBox(height: 15),
@@ -93,10 +96,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
       children: [
         SizedBox(
           width: 170,
-          height: 170,
+          height: 160,
           child: CircularProgressIndicator(
             value: (totalCalories - remainingCalories) / totalCalories,
-            strokeWidth: 10,
+            strokeWidth: 20,
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
           ),
@@ -106,14 +109,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
             Text(
               remainingCalories.toStringAsFixed(0),
               style: const TextStyle(
-                fontSize: 36,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,
               ),
             ),
             Text(
               'Kcal left',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 15, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -141,7 +144,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
     return Flexible(
       child: Container(
         padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -153,7 +156,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 color: Colors.grey[700],
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               subtitle,
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
@@ -345,14 +348,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 onPressed: () {
                   setState(() {
                     _selectedImage = null;
-                    _isImageConfirmed = false;
+                    _isImageConfirmed = true;
                   });
                 },
               ),
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -362,9 +365,20 @@ class _NutritionScreenState extends State<NutritionScreen> {
             ),
           ),
           onPressed: () {
-            setState(() {
-              _isImageConfirmed = true;
-            });
+            if (_selectedImage != null) {
+              context.read<ChatBlocBloc>().add(
+                ChatGenerateNewRecipeEvent(inputImage: _selectedImage!),
+              );
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          RecipeSuggestionScreen(imageFile: _selectedImage!),
+                ),
+              );
+            }
           },
           child: const Text(
             'Confirm',
