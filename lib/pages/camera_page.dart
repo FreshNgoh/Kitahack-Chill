@@ -77,6 +77,19 @@ class DisplayPhotoPage extends StatelessWidget {
             child: Icon(Icons.chevron_left),
           ),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Color.fromARGB(255, 112, 110, 110),
+                  width: 0.2,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(10),

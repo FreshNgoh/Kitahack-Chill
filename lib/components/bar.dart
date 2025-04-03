@@ -41,7 +41,7 @@ class Bar extends StatelessWidget {
               decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: Color.fromARGB(255, 182, 180, 180),
+                    color: Color.fromARGB(255, 112, 110, 110),
                     width: 0.2,
                   ),
                 ),
