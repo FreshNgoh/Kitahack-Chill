@@ -182,7 +182,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
         children: [
           Expanded(
             child: ElevatedButton.icon(
-              icon: Icon(Icons.restaurant_menu, size: 20),
+              icon: Icon(
+                Icons.restaurant_menu,
+                size: 20,
+                color:
+                    _showCookSection
+                        ? Colors.white
+                        : const Color.fromARGB(255, 123, 7, 144),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     _showCookSection ? Colors.blue : Colors.grey[100],
@@ -201,10 +208,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   _showRestaurantSection = false;
                 });
               },
-              label: const Text(
+              label: Text(
                 'Cook',
                 style: TextStyle(
-                  color: Colors.black87,
+                  color: _showCookSection ? Colors.white : Colors.black87,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -214,7 +221,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton.icon(
-              icon: const Icon(Icons.storefront, size: 20),
+              icon: Icon(
+                Icons.storefront,
+                size: 20,
+                color:
+                    _showRestaurantSection
+                        ? Colors.white
+                        : const Color.fromARGB(255, 123, 7, 144),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     _showRestaurantSection ? Colors.blue : Colors.grey[100],
@@ -235,10 +249,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   _showRestaurantSection = true;
                 });
               },
-              label: const Text(
+              label: Text(
                 'Restaurant',
                 style: TextStyle(
-                  color: Colors.black87,
+                  color: _showRestaurantSection ? Colors.white : Colors.black87,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -259,7 +273,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: Text(
-              'Let Google AI to decide your recipe today',
+              'Let Gemini AI to decide your recipe today',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -331,20 +345,46 @@ class _NutritionScreenState extends State<NutritionScreen> {
           alignment: Alignment.topRight,
           children: [
             Container(
-              height: 150,
-              width: 350,
+              height: 150, // Increased height
+              width: double.infinity, // Full width
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.grey[200],
                 image: DecorationImage(
                   image: FileImage(_selectedImage!),
                   fit: BoxFit.cover,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                  ),
+                ],
+                border: Border.all(color: Colors.white, width: 2),
               ),
+              clipBehavior: Clip.antiAlias,
             ),
-            SizedBox(
-              height: 30,
-              width: 30,
+            // Improved close button
+            Container(
+              margin: const EdgeInsets.all(8),
+              height: 28,
+              width: 28,
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withOpacity(0.9),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
               child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                padding: EdgeInsets.zero,
                 onPressed: () {
                   setState(() {
                     _selectedImage = null;
@@ -355,21 +395,22 @@ class _NutritionScreenState extends State<NutritionScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 24),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            backgroundColor: Colors.blueAccent,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(20),
             ),
+            elevation: 4,
+            shadowColor: Colors.blue[100],
           ),
           onPressed: () {
             if (_selectedImage != null) {
               context.read<ChatBlocBloc>().add(
                 ChatGenerateNewRecipeEvent(inputImage: _selectedImage!),
               );
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -380,13 +421,21 @@ class _NutritionScreenState extends State<NutritionScreen> {
               );
             }
           },
-          child: const Text(
-            'Confirm',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Procced with Gemini AI',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
           ),
         ),
       ],

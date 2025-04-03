@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application/bloc/chat_bloc_bloc.dart';
-import 'package:flutter_application/components/bar.dart';
 import 'package:flutter_application/models/chat_message_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
