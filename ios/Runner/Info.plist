@@ -28,6 +28,8 @@
 	<string>We need access to your photos to upload images</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to take photos</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need microphone access for uploading audio</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to save images to your photo library</string>
 	<key>UILaunchStoryboardName</key>

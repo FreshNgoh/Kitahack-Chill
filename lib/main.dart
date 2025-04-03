@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/bar.dart';
-import 'package:flutter_application/pages/avatar_page.dart';
-import 'package:flutter_application/pages/camera_page.dart';
-import 'package:flutter_application/pages/friend_page.dart';
-import 'package:flutter_application/pages/profile_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,14 +18,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "Poppins",
         scaffoldBackgroundColor: Colors.white,
       ),
-      initialRoute: '/', // Default route
-      routes: {
-        '/': (context) => Bar(), // Home Page
-        '/friends': (context) => FriendPage(),
-        '/camera': (context) => CameraPage(),
-        '/avatar': (context) => AvatarPage(),
-        '/setting': (context) => ProfilePage(),
-      },
+      home: Bar(),
     );
   }
 }
