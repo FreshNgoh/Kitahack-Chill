@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/bloc/chat_bloc_bloc.dart';
+import 'package:flutter_application/pages/google_restaurant.dart';
 import 'package:flutter_application/pages/recipe_suggestion.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -67,12 +68,11 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 10),
             _buildCalorieCard(),
-            const SizedBox(height: 25),
+            const SizedBox(height: 10),
             _buildNutrientRow(),
             _buildActionButtons(),
-            const SizedBox(height: 15),
             if (_showCookSection) ...[
               _selectedImage == null
                   ? Column(
@@ -83,7 +83,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   )
                   : _buildImagePreviewSection(),
             ],
-            if (_showRestaurantSection) ...{_buildRestaurantSection()},
+            if (_showRestaurantSection)
+              SizedBox(height: 300, child: RestaurantScreen()),
           ],
         ),
       ),
@@ -272,28 +273,57 @@ class _NutritionScreenState extends State<NutritionScreen> {
     );
   }
 
-  Widget _buildRestaurantSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Text(
-              'Find nearby restaurants',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-          ),
-          // Add restaurant list or other content
-        ],
-      ),
-    );
-  }
+  // Widget _buildRestaurantSection(BuildContext context) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 16),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Padding(
+  //           padding: const EdgeInsets.only(bottom: 20),
+  //           child: Text(
+  //             'Find nearby restaurants',
+  //             style: TextStyle(
+  //               fontSize: 16,
+  //               fontWeight: FontWeight.w600,
+  //               color: Colors.grey[800],
+  //             ),
+  //           ),
+  //         ),
+  //         InkWell(
+  //           onTap: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (_) => const RestaurantScreen()),
+  //             );
+  //           },
+  //           borderRadius: BorderRadius.circular(12),
+  //           child: Container(
+  //             padding: const EdgeInsets.all(16),
+  //             decoration: BoxDecoration(
+  //               color: Colors.grey[200],
+  //               borderRadius: BorderRadius.circular(12),
+  //             ),
+  //             child: Row(
+  //               children: [
+  //                 const Icon(Icons.restaurant, color: Colors.deepOrange),
+  //                 const SizedBox(width: 10),
+  //                 Text(
+  //                   'Tap to explore restaurants',
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     fontWeight: FontWeight.w500,
+  //                     color: Colors.grey[800],
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildUploadButton() {
     return Column(
