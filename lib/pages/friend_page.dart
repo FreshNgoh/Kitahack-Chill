@@ -6,86 +6,43 @@ class FriendPage extends StatelessWidget {
 
   final List<FriendsMealModal> friendsMeal = FriendsMealModal.getFriendsMeal();
 
+  Color getCalorieColor(int calories) {
+    if (calories > 3080) {
+      return Colors.red;
+    } else if (calories >= 2520) {
+      return Colors.green;
+    } else {
+      return Colors.orange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 10),
-          _goal(),
-          SizedBox(height: 40),
-          _friendList(),
-          SizedBox(height: 40),
+          const SizedBox(height: 20),
+          _header(),
+          const SizedBox(height: 10),
+          _userlist(),
         ],
       ),
     );
   }
 
-  Padding _goal() {
+  Padding _header() {
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: "Goal with ",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20, // Original size
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                TextSpan(
-                  text: "Steve",
-                  style: TextStyle(
-                    color: Color(0xff179C52),
-                    fontSize: 28, // Bigger size for Steve
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
           Text(
-            '123 CAL',
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.w600,
-              color: Color(0xff176BEF),
-            ),
-          ),
-          SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              // Funtion here
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              minimumSize: Size.zero, // Remove default minimum size
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min, // Makes row take minimum space
-              children: [
-                Icon(Icons.add_circle_outline, color: Colors.black, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Add Goal',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            "Friend's Activity",
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -93,52 +50,43 @@ class FriendPage extends StatelessWidget {
     );
   }
 
-  Column _friendList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-          child: Text(
-            "What's your friend eating?",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: friendsMeal.length,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          separatorBuilder: (context, index) => const SizedBox(height: 25),
-          itemBuilder: (context, index) {
-            final list = friendsMeal[index];
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Expanded _userlist() {
+    return Expanded(
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: friendsMeal.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 20),
+        itemBuilder: (context, index) {
+          final list = friendsMeal[index];
+          // dynamically get the color based on the calories
+          final calorieColor = getCalorieColor(list.calories);
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CircleAvatar(
                   radius: 25,
                   backgroundImage: AssetImage(list.avatar),
                 ),
-                SizedBox(width: 15),
+                const SizedBox(width: 15),
                 Expanded(
                   child: Column(
-                    spacing: 6,
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      //  User name
                       Row(
-                        spacing: 10,
                         children: [
                           Text(
                             list.userName,
                             style: const TextStyle(
-                              fontSize: 17,
+                              fontSize: 19,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             list.timeAgo,
                             style: TextStyle(
@@ -149,30 +97,58 @@ class FriendPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Text(
-                        '${list.calories} CAL',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xff176BEF),
-                        ),
-                      ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          list.mealImage,
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
+
+                      const SizedBox(height: 6),
+
+                      //  Icon + value
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.local_fire_department,
+                            color: calorieColor,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${list.calories}',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: calorieColor,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            'cal',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
+
+                const SizedBox(width: 10),
+
+                //  Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    list.mealImage,
+                    height: 60,
+                    width: 80,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ],
-            );
-          },
-        ),
-      ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
