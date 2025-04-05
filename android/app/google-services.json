@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "654005854244",
+    "project_id": "eat-meh-kitahack",
+    "storage_bucket": "eat-meh-kitahack.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654005854244:android:ca2f1cc94184e0a607f8b1",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKKdO2WsutoHWfOgWEv6rAYKf7wwqDSTc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
