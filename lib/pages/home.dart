@@ -44,7 +44,12 @@ class _NutritionScreenState extends State<NutritionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.only(
+          top: 10,
+          left: 20,
+          right: 20,
+          bottom: 20,
+        ),
         child: Column(
           children: [
             Row(
