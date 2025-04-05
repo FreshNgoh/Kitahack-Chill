@@ -11,7 +11,7 @@ class FriendPage extends StatelessWidget {
     return Scaffold(
       body: ListView(
         children: [
-          SizedBox(height: 30),
+          SizedBox(height: 10),
           _goal(),
           SizedBox(height: 40),
           _friendList(),

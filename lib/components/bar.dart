@@ -39,11 +39,14 @@ class Bar extends StatelessWidget {
                 // Add notification action
               },
             ),
-            IconButton(
-              icon: Icon(Icons.notifications_active, size: 25),
-              onPressed: () {
-                // Add notification action
-              },
+            Padding(
+              padding: const EdgeInsets.only(right: 15),
+              child: IconButton(
+                icon: Icon(Icons.notifications_active, size: 25),
+                onPressed: () {
+                  // Add notification action
+                },
+              ),
             ),
           ],
           bottom: PreferredSize(
