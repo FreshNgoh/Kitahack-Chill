@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/pages/home.dart';
+import 'package:flutter_application/pages/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Bar extends StatelessWidget {
   const Bar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get the currently signed-in user
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // Extract the username (part before '@')
+    String? username = "Guest"; // Default if no user is signed in
+    if (user != null && user.email != null) {
+      username = user.displayName; // Extract username from email
+    }
+
     return DefaultTabController(
       initialIndex: 1,
       length: 5,
@@ -13,7 +24,7 @@ class Bar extends StatelessWidget {
         appBar: AppBar(
           title: Align(
             alignment: Alignment.centerLeft,
-            child: const Text("Welcome Back, {Username}"), //replace
+            child: Text("Hi, $username"), //replace
           ),
           // backgroundColor: Colors.black,
           actions: [
@@ -60,7 +71,7 @@ class Bar extends StatelessWidget {
                 child: const Tab(icon: Icon(Icons.camera_alt, size: 25)),
               ),
             ),
-            Tab(icon: Icon(Icons.person), text: "Avatar"),
+            Tab(icon: Icon(Icons.person), text: "Avatarss"),
             Tab(icon: Icon(Icons.settings), text: "Profile"),
           ],
         ),
@@ -71,7 +82,7 @@ class Bar extends StatelessWidget {
             Center(child: Text("Friend")),
             Center(child: Text("Camera")),
             Center(child: Text("Avatar")),
-            Center(child: Text("Profile")),
+            ProfileScreen(), // Profile page
           ],
         ),
       ),
