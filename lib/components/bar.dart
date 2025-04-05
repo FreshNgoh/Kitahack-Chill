@@ -1,22 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/pages/avatar_page.dart';
+import 'package:flutter_application/pages/camera_page.dart';
+import 'package:flutter_application/pages/friend_page.dart';
 import 'package:flutter_application/pages/home.dart';
+import 'package:flutter_application/pages/profile_page.dart';
+import 'package:flutter_application/pages/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Bar extends StatelessWidget {
   const Bar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get the currently signed-in user
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // Extract the username (part before '@')
+    String? username = "Guest"; // Default if no user is signed in
+    if (user != null && user.email != null) {
+      username = user.displayName; // Extract username from email
+    }
+
     return DefaultTabController(
-      initialIndex: 1,
+      initialIndex: 0,
       length: 5,
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.white,
           title: Align(
             alignment: Alignment.centerLeft,
-            child: const Text("Welcome Back, {Username}"), //replace
+            child: Text("Hi, $username"), //replace
           ),
           // backgroundColor: Colors.black,
           actions: [
+            IconButton(
+              icon: Icon(Icons.person_search, size: 25),
+              onPressed: () {
+                // Add notification action
+              },
+            ),
             IconButton(
               icon: Icon(Icons.notifications_active, size: 25),
               onPressed: () {
@@ -29,49 +51,61 @@ class Bar extends StatelessWidget {
             child: Container(
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Colors.grey, width: 0.3),
+                  bottom: BorderSide(
+                    color: Color.fromARGB(255, 112, 110, 110),
+                    width: 0.2,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        bottomNavigationBar: TabBar(
-          labelColor: Colors.blue,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.transparent,
-          tabs: <Widget>[
-            Tab(icon: Icon(Icons.home), text: "Home"),
-            Tab(icon: Icon(Icons.group), text: "Friends"),
-            Transform.translate(
-              offset: const Offset(0, -15), // Lift the tab upward
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(blue: 0.5),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                    ),
-                  ],
+        bottomNavigationBar: Container(
+          height: 90,
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: TabBar(
+            padding: EdgeInsets.only(bottom: 10),
+            // Uncomment it if you dont want the onClick effect.
+            // splashFactory: NoSplash.splashFactory,
+            // overlayColor: MaterialStateProperty.all(Colors.transparent),
+            dividerHeight: 0,
+            labelColor: Colors.blue,
+            unselectedLabelColor: Colors.black54,
+            indicatorColor: Colors.transparent,
+            tabs: <Widget>[
+              Tab(icon: Icon(Icons.home), text: "Home"),
+              Tab(icon: Icon(Icons.group), text: "Friends"),
+              Transform.translate(
+                offset: const Offset(0, -20), // Lift the tab upward
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.4),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: const Tab(icon: Icon(Icons.camera_alt, size: 25)),
                 ),
-                child: const Tab(icon: Icon(Icons.camera_alt, size: 25)),
               ),
-            ),
-            Tab(icon: Icon(Icons.person), text: "Avatar"),
-            Tab(icon: Icon(Icons.settings), text: "Profile"),
-          ],
+              Tab(icon: Icon(Icons.person), text: "Avatar"),
+              Tab(icon: Icon(Icons.settings), text: "Profile"),
+            ],
+          ),
         ),
         // Change the view page
-        body: const TabBarView(
+        body: TabBarView(
           children: <Widget>[
             NutritionScreen(),
-            Center(child: Text("Friend")),
-            Center(child: Text("Camera")),
-            Center(child: Text("Avatar")),
-            Center(child: Text("Profile")),
+            FriendPage(),
+            CameraPage(),
+            AvatarPage(),
+            ProfilePage(),
           ],
         ),
       ),

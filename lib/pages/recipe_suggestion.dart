@@ -14,7 +14,23 @@ class RecipeSuggestionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Recipe Suggestions')),
+      appBar: AppBar(
+        title: const Text('Recipe Suggestions'),
+        backgroundColor: Colors.white,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Color.fromARGB(255, 112, 110, 110),
+                  width: 0.2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
       body: BlocBuilder<ChatBlocBloc, ChatBlocState>(
         builder: (context, state) {
           if (state is ChatLoadingState) {
@@ -51,9 +67,12 @@ class RecipeSuggestionScreen extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(
-            width: 350,
+            width: double.infinity,
             height: 240,
-            child: Image.file(imageFile, fit: BoxFit.cover),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15), // Adjust this value
+              child: Image.file(imageFile, fit: BoxFit.cover),
+            ),
           ),
           const SizedBox(height: 20),
           buildAIResponse(messages),
