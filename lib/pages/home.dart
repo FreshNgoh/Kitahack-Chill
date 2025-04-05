@@ -1,5 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/bloc/chat_bloc_bloc.dart';
+import 'package:flutter_application/pages/google_restaurant.dart';
+import 'package:flutter_application/pages/recipe_suggestion.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 class NutritionScreen extends StatefulWidget {
@@ -64,12 +68,11 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             _buildCalorieCard(),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             _buildNutrientRow(),
             _buildActionButtons(),
-            const SizedBox(height: 15),
             if (_showCookSection) ...[
               _selectedImage == null
                   ? Column(
@@ -80,7 +83,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   )
                   : _buildImagePreviewSection(),
             ],
-            if (_showRestaurantSection) ...{_buildRestaurantSection()},
+            if (_showRestaurantSection)
+              SizedBox(height: 300, child: RestaurantScreen()),
           ],
         ),
       ),
@@ -93,10 +97,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
       children: [
         SizedBox(
           width: 170,
-          height: 170,
+          height: 160,
           child: CircularProgressIndicator(
             value: (totalCalories - remainingCalories) / totalCalories,
-            strokeWidth: 10,
+            strokeWidth: 20,
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
           ),
@@ -106,14 +110,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
             Text(
               remainingCalories.toStringAsFixed(0),
               style: const TextStyle(
-                fontSize: 36,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,
               ),
             ),
             Text(
               'Kcal left',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 15, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -141,7 +145,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
     return Flexible(
       child: Container(
         padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -153,7 +157,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 color: Colors.grey[700],
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               subtitle,
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
@@ -269,28 +273,57 @@ class _NutritionScreenState extends State<NutritionScreen> {
     );
   }
 
-  Widget _buildRestaurantSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Text(
-              'Find nearby restaurants',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-          ),
-          // Add restaurant list or other content
-        ],
-      ),
-    );
-  }
+  // Widget _buildRestaurantSection(BuildContext context) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 16),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Padding(
+  //           padding: const EdgeInsets.only(bottom: 20),
+  //           child: Text(
+  //             'Find nearby restaurants',
+  //             style: TextStyle(
+  //               fontSize: 16,
+  //               fontWeight: FontWeight.w600,
+  //               color: Colors.grey[800],
+  //             ),
+  //           ),
+  //         ),
+  //         InkWell(
+  //           onTap: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (_) => const RestaurantScreen()),
+  //             );
+  //           },
+  //           borderRadius: BorderRadius.circular(12),
+  //           child: Container(
+  //             padding: const EdgeInsets.all(16),
+  //             decoration: BoxDecoration(
+  //               color: Colors.grey[200],
+  //               borderRadius: BorderRadius.circular(12),
+  //             ),
+  //             child: Row(
+  //               children: [
+  //                 const Icon(Icons.restaurant, color: Colors.deepOrange),
+  //                 const SizedBox(width: 10),
+  //                 Text(
+  //                   'Tap to explore restaurants',
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     fontWeight: FontWeight.w500,
+  //                     color: Colors.grey[800],
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildUploadButton() {
     return Column(
@@ -345,14 +378,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 onPressed: () {
                   setState(() {
                     _selectedImage = null;
-                    _isImageConfirmed = false;
+                    _isImageConfirmed = true;
                   });
                 },
               ),
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
@@ -362,9 +395,20 @@ class _NutritionScreenState extends State<NutritionScreen> {
             ),
           ),
           onPressed: () {
-            setState(() {
-              _isImageConfirmed = true;
-            });
+            if (_selectedImage != null) {
+              context.read<ChatBlocBloc>().add(
+                ChatGenerateNewRecipeEvent(inputImage: _selectedImage!),
+              );
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) =>
+                          RecipeSuggestionScreen(imageFile: _selectedImage!),
+                ),
+              );
+            }
           },
           child: const Text(
             'Confirm',
