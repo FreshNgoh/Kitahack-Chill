@@ -132,7 +132,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
-                                      vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[200],
@@ -145,30 +144,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-
-                              // Status and Distance
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.circle,
-                                    color:
+                                  // Open Now status
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.circle,
+                                        color:
+                                            restaurant.openingHours.isOpenNow
+                                                ? Colors.green
+                                                : Colors.red,
+                                        size: 12,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
                                         restaurant.openingHours.isOpenNow
-                                            ? Colors.green
-                                            : Colors.red,
-                                    size: 12,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    restaurant.openingHours.isOpenNow
-                                        ? 'Open'
-                                        : 'Closed',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 14,
-                                    ),
+                                            ? 'Open Now'
+                                            : 'Closed',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
