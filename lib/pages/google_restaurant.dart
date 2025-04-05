@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/bloc/google_map_bloc.dart';
+import 'package:flutter_application/services/location_handler.dart';
 import 'package:flutter_application/utils/constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
@@ -11,12 +13,31 @@ class RestaurantScreen extends StatefulWidget {
 }
 
 class _RestaurantScreenState extends State<RestaurantScreen> {
+  late final Future<Position> currentPosition;
+
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<GoogleMapBloc>(
-      context,
-    ).add(GoogleRestaurantEvent(lat: 1.4779986, lng: 103.761852));
+    currentPosition = LocationHandler.getCurrentLocation();
+
+    currentPosition
+        .then((position) {
+          if (mounted) {
+            BlocProvider.of<GoogleMapBloc>(context).add(
+              GoogleRestaurantEvent(
+                lat: position.latitude,
+                lng: position.longitude,
+              ),
+            );
+          }
+        })
+        .catchError((error) {
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Location error: $error')));
+          }
+        });
   }
 
   @override
