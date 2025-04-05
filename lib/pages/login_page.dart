@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/components/bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/user.dart';
+import "../services/user/user_service.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,6 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UserService _userService = UserService();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -57,8 +61,25 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         UserCredential userCredential = await _auth
             .createUserWithEmailAndPassword(email: email, password: password);
+
+        String uid = userCredential.user!.uid;
         await userCredential.user?.updateDisplayName(username);
-        await userCredential.user?.reload();
+
+        try {
+          //Create user in Firestore
+          UserModel newUser = UserModel(
+            uid: uid,
+            username: username,
+            email: email,
+            userRecordId: "",
+            friends: [],
+          );
+
+          await _userService.addUser(newUser);
+        } catch (e) {
+          print("Error creating user in Firestore: $e");
+        }
+
         _showSuccess("Registration successful!");
       }
     } on FirebaseAuthException catch (e) {
