@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/bloc/google_map_bloc.dart';
+import 'package:flutter_application/services/location_handler.dart';
 import 'package:flutter_application/utils/constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 
 class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({super.key});
@@ -11,12 +13,31 @@ class RestaurantScreen extends StatefulWidget {
 }
 
 class _RestaurantScreenState extends State<RestaurantScreen> {
+  late final Future<Position> currentPosition;
+
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<GoogleMapBloc>(
-      context,
-    ).add(GoogleRestaurantEvent(lat: 1.4779986, lng: 103.761852));
+    currentPosition = LocationHandler.getCurrentLocation();
+
+    currentPosition
+        .then((position) {
+          if (mounted) {
+            BlocProvider.of<GoogleMapBloc>(context).add(
+              GoogleRestaurantEvent(
+                lat: position.latitude,
+                lng: position.longitude,
+              ),
+            );
+          }
+        })
+        .catchError((error) {
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Location error: $error')));
+          }
+        });
   }
 
   @override
@@ -111,7 +132,6 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
-                                      vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[200],
@@ -124,30 +144,29 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-
-                              // Status and Distance
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.circle,
-                                    color:
+                                  // Open Now status
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.circle,
+                                        color:
+                                            restaurant.openingHours.isOpenNow
+                                                ? Colors.green
+                                                : Colors.red,
+                                        size: 12,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
                                         restaurant.openingHours.isOpenNow
-                                            ? Colors.green
-                                            : Colors.red,
-                                    size: 12,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    restaurant.openingHours.isOpenNow
-                                        ? 'Open'
-                                        : 'Closed',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 14,
-                                    ),
+                                            ? 'Open Now'
+                                            : 'Closed',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

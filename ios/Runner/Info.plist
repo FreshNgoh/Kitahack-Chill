@@ -46,6 +46,10 @@
 	<string>We need microphone access for uploading audio</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to save images to your photo library</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to location when open.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs access to location when in the background.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photos to upload images</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

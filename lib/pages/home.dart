@@ -84,7 +84,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   : _buildImagePreviewSection(),
             ],
             if (_showRestaurantSection)
-              SizedBox(height: 300, child: RestaurantScreen()),
+              SizedBox(height: 270, child: RestaurantScreen()),
           ],
         ),
       ),
@@ -157,12 +157,12 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 color: Colors.grey[700],
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Text(
               subtitle,
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             LinearProgressIndicator(
               value: progressValue,
               minHeight: 6,
@@ -286,58 +286,6 @@ class _NutritionScreenState extends State<NutritionScreen> {
       ),
     );
   }
-
-  // Widget _buildRestaurantSection(BuildContext context) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(vertical: 16),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Padding(
-  //           padding: const EdgeInsets.only(bottom: 20),
-  //           child: Text(
-  //             'Find nearby restaurants',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.w600,
-  //               color: Colors.grey[800],
-  //             ),
-  //           ),
-  //         ),
-  //         InkWell(
-  //           onTap: () {
-  //             Navigator.push(
-  //               context,
-  //               MaterialPageRoute(builder: (_) => const RestaurantScreen()),
-  //             );
-  //           },
-  //           borderRadius: BorderRadius.circular(12),
-  //           child: Container(
-  //             padding: const EdgeInsets.all(16),
-  //             decoration: BoxDecoration(
-  //               color: Colors.grey[200],
-  //               borderRadius: BorderRadius.circular(12),
-  //             ),
-  //             child: Row(
-  //               children: [
-  //                 const Icon(Icons.restaurant, color: Colors.deepOrange),
-  //                 const SizedBox(width: 10),
-  //                 Text(
-  //                   'Tap to explore restaurants',
-  //                   style: TextStyle(
-  //                     fontSize: 14,
-  //                     fontWeight: FontWeight.w500,
-  //                     color: Colors.grey[800],
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildUploadButton() {
     return Column(
