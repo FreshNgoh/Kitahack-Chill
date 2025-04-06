@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/models/friends_meal_modal.dart';
+import 'package:photo_view/photo_view.dart';
 
 class FriendPage extends StatelessWidget {
   FriendPage({super.key});
@@ -135,19 +136,49 @@ class FriendPage extends StatelessWidget {
                 const SizedBox(width: 10),
 
                 //  Image
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    list.mealImage,
-                    height: 60,
-                    width: 80,
-                    fit: BoxFit.cover,
+                GestureDetector(
+                  onTap: () => _showImageDetail(context, list.mealImage),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      list.mealImage,
+                      height: 60,
+                      width: 80,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _showImageDetail(BuildContext context, String imagePath) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.black87,
+                iconTheme: const IconThemeData(color: Colors.white),
+              ),
+              backgroundColor: Colors.black,
+              body: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: PhotoView(
+                  imageProvider: AssetImage(imagePath),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 2,
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
       ),
     );
   }
