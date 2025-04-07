@@ -13,6 +13,7 @@ part 'chat_bloc_state.dart';
 class ChatBlocBloc extends Bloc<ChatBlocEvent, ChatBlocState> {
   ChatBlocBloc() : super(ChatSuccessState(messages: [])) {
     on<ChatGenerateNewRecipeEvent>(chatGenerateNewRecipeEvent);
+    on<AnalyzeMealImageEvent>(analyzeMealImageEvent);
   }
   List<ChatMessageModel> messages = [];
 
@@ -45,6 +46,56 @@ class ChatBlocBloc extends Bloc<ChatBlocEvent, ChatBlocState> {
 
       messages.add(userMessage);
       emit(ChatLoadingState());
+
+      final aiResponse = await ChatRepo.chatIRecipeGenerationRepo(messages);
+      final aiMessage = ChatMessageModel(
+        parts: [ChatPartModel(text: _parseAIResponse(aiResponse))],
+      );
+
+      messages.add(aiMessage);
+      emit(ChatSuccessState(messages: [...messages]));
+    } catch (e) {
+      messages.add(
+        ChatMessageModel(
+          parts: [ChatPartModel(text: "Error: ${e.toString()}")],
+        ),
+      );
+      emit(ChatSuccessState(messages: [...messages]));
+    }
+  }
+
+  FutureOr<void> analyzeMealImageEvent(
+    AnalyzeMealImageEvent event,
+    Emitter<ChatBlocState> emit,
+  ) async {
+    emit(AnalyzeMealLoadingState()); // Emit loading state
+
+    try {
+      messages = [];
+
+      final imageFile = event.inputImage;
+      if (!await imageFile.exists()) throw Exception("Image file not found");
+
+      final bytes = await imageFile.readAsBytes();
+      if (bytes.lengthInBytes > 4 * 1024 * 1024) {
+        throw Exception("Image size exceeds 4MB limit");
+      }
+      final base64Image = base64Encode(bytes);
+
+      final analysis = ChatMessageModel(
+        parts: [
+          ChatPartModel(
+            inlineData: InlineData(mimeType: 'image/jpeg', data: base64Image),
+          ),
+          ChatPartModel(
+            text:
+                'This is a meal image for one serving, analyze the calories of the meal by giving an exact number although it may not be accurate. Also provide a brief recommendation to the meal in one sentence. Return your response in JSON format',
+          ),
+        ],
+      );
+
+      messages.add(analysis);
+      emit(AnalyzeMealLoadingState());
 
       final aiResponse = await ChatRepo.chatIRecipeGenerationRepo(messages);
       final aiMessage = ChatMessageModel(

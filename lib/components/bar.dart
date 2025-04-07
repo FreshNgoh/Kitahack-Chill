@@ -6,6 +6,7 @@ import 'package:flutter_application/pages/home.dart';
 import 'package:flutter_application/pages/profile_page.dart';
 import 'package:flutter_application/pages/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application/pages/friend_request_page.dart';
 
 class Bar extends StatelessWidget {
   const Bar({super.key});
@@ -34,9 +35,12 @@ class Bar extends StatelessWidget {
           // backgroundColor: Colors.black,
           actions: [
             IconButton(
-              icon: Icon(Icons.person_search, size: 25),
+              icon: Icon(Icons.people, size: 25),
               onPressed: () {
-                // Add notification action
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FriendRequestPage()),
+                );
               },
             ),
             Padding(
@@ -108,7 +112,7 @@ class Bar extends StatelessWidget {
             FriendPage(),
             CameraPage(),
             AvatarPage(),
-            ProfilePage(),
+            ProfileScreen(),
           ],
         ),
       ),

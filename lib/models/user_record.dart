@@ -3,34 +3,36 @@ import "package:cloud_firestore/cloud_firestore.dart";
 class UserRecord {
   String userUid;
   String imageUrl;
-  Timestamp createdAt;
-  Timestamp updatedAt;
-  int calories;
+  Timestamp? createdAt;
+  Timestamp? updatedAt;
+  String calories;
+  String? recommendation;
 
   UserRecord({
     required this.userUid,
     required this.imageUrl,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
     required this.calories,
+    this.recommendation,
   });
 
   UserRecord.fromJson(Map<String, Object?> json)
     : this(
         userUid: json['userUid']! as String,
         imageUrl: json['imageUrl']! as String,
-        createdAt: json['createdAt']! as Timestamp,
-        updatedAt: json['updatedAt']! as Timestamp,
-        calories: json['calories']! as int,
+        calories: json['calories']! as String,
+        recommendation: json['recommendation'] as String?,
       );
 
   Map<String, Object?> toJson() {
     return {
       'userUid': userUid,
       'imageUrl': imageUrl,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
+      'updatedAt': updatedAt ?? FieldValue.serverTimestamp(),
       'calories': calories,
+      'recommendation': recommendation,
     };
   }
 }
