@@ -67,85 +67,101 @@ class FriendPage extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundImage: AssetImage(list.avatar),
+                GestureDetector(
+                  onTap: () => _showImageDetail(context, list.mealImage),
+                  child: CircleAvatar(
+                    radius: 25,
+                    backgroundImage: AssetImage(list.avatar),
+                  ),
                 ),
                 const SizedBox(width: 15),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      //  User name
-                      Row(
+                  child: GestureDetector(
+                    onTap: () => _showImageDetail(context, list.mealImage),
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            list.userName,
-                            style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          //  User name
+                          Row(
+                            children: [
+                              Text(
+                                list.userName,
+                                style: const TextStyle(
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                list.timeAgo,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            list.timeAgo,
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
+
+                          const SizedBox(height: 6),
+
+                          //  Icon + value
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.local_fire_department,
+                                color: calorieColor,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${list.calories}',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: calorieColor,
+                                ),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                'cal',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 6),
-
-                      //  Icon + value
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.local_fire_department,
-                            color: calorieColor,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${list.calories}',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: calorieColor,
-                            ),
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            'cal',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
                 ),
 
                 const SizedBox(width: 10),
 
                 //  Image
+                // GestureDetector(
+                //   onTap: () => _showImageDetail(context, list.mealImage),
+                //   child: ClipRRect(
+                //     borderRadius: BorderRadius.circular(12),
+                //     child: Image.asset(
+                //       list.mealImage,
+                //       height: 60,
+                //       width: 80,
+                //       fit: BoxFit.cover,
+                //     ),
+                //   ),
+                // ),
                 GestureDetector(
                   onTap: () => _showImageDetail(context, list.mealImage),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      list.mealImage,
-                      height: 60,
-                      width: 80,
-                      fit: BoxFit.cover,
-                    ),
+                  child: Icon(
+                    Icons.remove_red_eye_outlined,
+                    size: 20,
+                    color: Colors.grey[600],
                   ),
                 ),
               ],
