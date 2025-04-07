@@ -79,6 +79,7 @@ class FriendPage extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () => _showImageDetail(context, list.mealImage),
                     child: Container(
+                      color: Colors.white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
