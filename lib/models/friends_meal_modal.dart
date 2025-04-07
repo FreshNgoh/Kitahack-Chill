@@ -21,7 +21,7 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "Steve",
-        calories: 123,
+        calories: 4000,
         timeAgo: "1h",
       ),
     );
@@ -30,7 +30,7 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "Robert Downey Jr",
-        calories: 123,
+        calories: 2500,
         timeAgo: "2h",
       ),
     );
@@ -39,7 +39,7 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "Scarlett Johansson",
-        calories: 123,
+        calories: 1000,
         timeAgo: "1min",
       ),
     );
@@ -48,7 +48,7 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "Chris Hemsworth",
-        calories: 123,
+        calories: 3090,
         timeAgo: "20min",
       ),
     );
@@ -57,7 +57,7 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "Tom Holland",
-        calories: 123,
+        calories: 2500,
         timeAgo: "10h",
       ),
     );
@@ -66,7 +66,7 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "elizabeth olsen",
-        calories: 123,
+        calories: 2000,
         timeAgo: "8h",
       ),
     );
@@ -75,7 +75,7 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "Chris Evans",
-        calories: 123,
+        calories: 4000,
         timeAgo: "23h",
       ),
     );
@@ -84,7 +84,61 @@ class FriendsMealModal {
         avatar: "assets/img/avatar.jpeg",
         mealImage: "assets/img/meal.jpg",
         userName: "Jason Statham",
-        calories: 123,
+        calories: 3000,
+        timeAgo: "5min",
+      ),
+    );
+    friendsMeal.add(
+      FriendsMealModal(
+        avatar: "assets/img/avatar.jpeg",
+        mealImage: "assets/img/meal.jpg",
+        userName: "Jason Statham",
+        calories: 3100,
+        timeAgo: "5min",
+      ),
+    );
+    friendsMeal.add(
+      FriendsMealModal(
+        avatar: "assets/img/avatar.jpeg",
+        mealImage: "assets/img/meal.jpg",
+        userName: "Jason Statham",
+        calories: 100,
+        timeAgo: "5min",
+      ),
+    );
+    friendsMeal.add(
+      FriendsMealModal(
+        avatar: "assets/img/avatar.jpeg",
+        mealImage: "assets/img/meal.jpg",
+        userName: "Jason Statham",
+        calories: 3023,
+        timeAgo: "5min",
+      ),
+    );
+    friendsMeal.add(
+      FriendsMealModal(
+        avatar: "assets/img/avatar.jpeg",
+        mealImage: "assets/img/meal.jpg",
+        userName: "Jason Statham",
+        calories: 4310,
+        timeAgo: "5min",
+      ),
+    );
+    friendsMeal.add(
+      FriendsMealModal(
+        avatar: "assets/img/avatar.jpeg",
+        mealImage: "assets/img/meal.jpg",
+        userName: "Jason Statham",
+        calories: 3102,
+        timeAgo: "5min",
+      ),
+    );
+    friendsMeal.add(
+      FriendsMealModal(
+        avatar: "assets/img/avatar.jpeg",
+        mealImage: "assets/img/meal.jpg",
+        userName: "Jason Statham",
+        calories: 2000,
         timeAgo: "5min",
       ),
     );
