@@ -8,3 +8,8 @@ class ChatGenerateNewRecipeEvent extends ChatBlocEvent {
   final File inputImage;
   ChatGenerateNewRecipeEvent({required this.inputImage});
 }
+
+class AnalyzeMealImageEvent extends ChatBlocEvent {
+  final File inputImage;
+  AnalyzeMealImageEvent({required this.inputImage});
+}
