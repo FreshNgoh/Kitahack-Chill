@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application/components/bar.dart'; // Assuming this is your navigation bar
-import 'package:flutter_application/firebase_options.dart';
+import 'package:flutter_application/utils/firebase_options.dart';
 import 'package:flutter_application/pages/login_page.dart'; // Import LoginPage
 
 Future<void> main() async {
@@ -21,9 +21,6 @@ Future<void> main() async {
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
-
-  // Initiate Firestore Emulator
-  FirebaseFirestore.instance.useFirestoreEmulator('localhost', 9090);
 
   runApp(const MyApp());
 }

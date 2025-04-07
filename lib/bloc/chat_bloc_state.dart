@@ -12,3 +12,10 @@ class ChatSuccessState extends ChatBlocState {
 }
 
 class ChatLoadingState extends ChatBlocState {}
+
+class AnalyzeMealLoadingState extends ChatBlocState {}
+
+class AnalyzeMealErrorState extends ChatBlocState {
+  final String error;
+  AnalyzeMealErrorState({required this.error});
+}
