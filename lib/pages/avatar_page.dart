@@ -118,12 +118,40 @@ class _AvatarPageState extends State<AvatarPage> {
                   borderRadius: BorderRadius.circular(150),
                   border: Border.all(color: currentColor, width: 4),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(150),
-                  child: NotionAvatar(
-                    useRandom: true,
-                    onCreated: (controller) => this.controller = controller,
-                  ),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(150),
+                      child: NotionAvatar(
+                        // useRandom: true,
+                        onCreated: (NotionAvatarController controller) {
+                          this.controller = controller;
+                          //! Examples
+                          // this.controller?.random();
+                          this.controller?.setAccessories(1);
+                          // this.controller?.setEyes(5);
+                          // this.controller?.setEyebrows(5);
+                          // this.controller?.setFace(5);
+                          // this.controller?.setGlasses(5);
+                          // this.controller?.setHair(5);
+                          // this.controller?.setMouth(5);
+                          // this.controller?.setNose(5);
+                          // this.controller?.setDetails(5);
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 20,
+                      right: 10,
+                      child: FloatingActionButton(
+                        backgroundColor: currentColor,
+                        shape: CircleBorder(),
+                        mini: true,
+                        onPressed: () {},
+                        child: const Icon(Icons.edit, color: Colors.white70),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -220,8 +248,7 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 }
 
-// Add this StatefulWidget class in your widget tree
-
+// Input Area start here
 class InputBottomSheet extends StatefulWidget {
   const InputBottomSheet({super.key});
 
