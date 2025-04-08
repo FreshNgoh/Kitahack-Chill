@@ -112,7 +112,7 @@ class Bar extends StatelessWidget {
             FriendPage(),
             CameraPage(),
             AvatarPage(),
-            ProfileScreen(),
+            ProfilePage(),
           ],
         ),
       ),
