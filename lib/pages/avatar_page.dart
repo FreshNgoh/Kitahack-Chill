@@ -148,10 +148,20 @@ class _AvatarPageState extends State<AvatarPage> {
           right: 20,
           child: FloatingActionButton(
             onPressed: () {
-              /* Add action */
+              showModalBottomSheet(
+                context: context,
+                isDismissible: true,
+                enableDrag: true,
+                backgroundColor: Colors.white,
+                isScrollControlled:
+                    true, // Allows the sheet to resize for keyboard
+                builder: (BuildContext context) {
+                  return const InputBottomSheet();
+                },
+              );
             },
-            backgroundColor: currentColor.withOpacity(0.7),
-            child: Icon(Icons.add, color: Colors.white, size: 32),
+            backgroundColor: currentColor.withOpacity(0.6),
+            child: const Icon(Icons.add, color: Colors.white, size: 32),
           ),
         ),
       ],
@@ -210,191 +220,238 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 }
 
+// Add this StatefulWidget class in your widget tree
 
+class InputBottomSheet extends StatefulWidget {
+  const InputBottomSheet({super.key});
 
+  @override
+  _InputBottomSheetState createState() => _InputBottomSheetState();
+}
 
-// class AvatarPage extends StatelessWidget {
-//   const AvatarPage({super.key});
+class _InputBottomSheetState extends State<InputBottomSheet> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _exerciseController =
+      TextEditingController(); // New controller
+  final TextEditingController _durationController = TextEditingController();
+  final TextEditingController _energyController = TextEditingController();
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Padding(
-//         padding: const EdgeInsets.all(20),
-//         child: Column(
-//           children: [
-//             // Row 1: Header + Info | 3D Viewer
-//             Expanded(
-//               child: Row(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   // Column 1: Header and Info
-//                   Expanded(
-//                     flex: 4,
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: [
-//                             Row(
-//                               crossAxisAlignment: CrossAxisAlignment.baseline,
-//                               textBaseline: TextBaseline.alphabetic,
-//                               children: [
-//                                 const Text(
-//                                   'Calories',
-//                                   style: TextStyle(
-//                                     fontSize: 20,
-//                                     fontWeight: FontWeight.bold,
-//                                     color: Colors.black87,
-//                                   ),
-//                                 ),
-//                                 const SizedBox(width: 3),
-//                                 Text(
-//                                   '/week',
-//                                   style: TextStyle(
-//                                     fontSize: 14,
-//                                     fontWeight: FontWeight.w500,
-//                                     color: Colors.grey[600],
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                             Text(
-//                               '1000',
-//                               style: TextStyle(
-//                                 fontSize: 55,
-//                                 fontWeight: FontWeight.w500,
-//                                 color: Colors.black87,
-//                               ),
-//                             ),
-//                           ],
-//                         ),
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
 
-//                         const SizedBox(height: 25),
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _durationController.dispose();
+    _energyController.dispose();
+    super.dispose();
+  }
 
-//                         _buildMetricItem(
-//                           icon: Icons.local_fire_department,
-//                           iconColor:
-//                               Colors.deepOrangeAccent, // Custom icon color
-//                           value: '1,840',
-//                           label: 'calories',
-//                         ),
-//                         const SizedBox(height: 25),
-//                         _buildMetricItem(
-//                           icon: Icons.directions_walk,
-//                           iconColor: Colors.green,
-//                           value: '3,248',
-//                           label: 'steps',
-//                         ),
-//                         const SizedBox(height: 25),
-//                         _buildMetricItem(
-//                           icon: Icons.access_time,
-//                           iconColor: Colors.blueAccent,
-//                           value: '6.5',
-//                           label: 'hours',
-//                         ),
-//                       ],
-//                     ),
-//                   ),
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() => _selectedDate = picked);
+    }
+  }
 
-//                   // Column 2: 3D
-//                   Expanded(
-//                     flex: 6,
-//                     child: const Flutter3DViewer(
-//                       src: "assets/3d/human_body.glb",
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() => _selectedTime = picked);
+    }
+  }
 
-//             // Row 2: Action Boxes
-//             Container(
-//               height: 100,
-//               padding: const EdgeInsets.all(0),
-//               margin: EdgeInsets.only(bottom: 20),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                 children: [
-//                   _buildActionBox(Colors.blue, 'Exercise'),
-//                   _buildActionBox(Colors.green, 'Diet'),
-//                   _buildActionBox(Colors.orange, 'Sleep'),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
+  Widget build(BuildContext context) {
+    final Color primaryColor = Colors.indigo;
+    final Color accentColor = Colors.indigoAccent;
 
-//   Widget _buildActionBox(Color color, String label) {
-//     return Flexible(
-//       child: InkWell(
-//         splashColor: color.withOpacity(0.3),
-//         highlightColor: color.withOpacity(0.1),
-//         borderRadius: BorderRadius.circular(12),
-//         onTap: () {
-//           // click handler here
-//         },
-//         child: Container(
-//           width: 110,
-//           decoration: BoxDecoration(
-//             color: color.withOpacity(0.2),
-//             borderRadius: BorderRadius.circular(12),
-//           ),
-//           padding: const EdgeInsets.all(12),
-//           child: Center(
-//             child: Text(
-//               label,
-//               style: TextStyle(
-//                 fontSize: 18,
-//                 fontWeight: FontWeight.w600,
-//                 color: color,
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(25),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // const Icon(Icons.fitness_center, size: 40, color: Colors.blueGrey),
+            const SizedBox(height: 20),
 
-//   Widget _buildMetricItem({
-//     required IconData icon,
-//     required Color iconColor,
-//     required String value,
-//     required String label,
-//     double labelSize = 15,
-//   }) {
-//     return Row(
-//       children: [
-//         Icon(icon, size: 40, color: iconColor),
-//         const SizedBox(width: 15),
-//         Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               value,
-//               style: const TextStyle(
-//                 fontSize: 20,
-//                 fontWeight: FontWeight.w600,
-//                 color: Colors.black87,
-//               ),
-//             ),
-//             Text(
-//               label,
-//               style: TextStyle(
-//                 fontSize: labelSize,
-//                 fontWeight: FontWeight.w500,
-//                 color: Colors.grey, // Constant gray color
-//               ),
-//             ),
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-// }
+            // Title input
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                labelText: 'Title',
+                labelStyle: TextStyle(color: accentColor),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                prefixIcon: Icon(Icons.title, color: accentColor),
+              ),
+            ),
 
+            const SizedBox(height: 20),
 
+            // Exercise input
+            TextField(
+              controller: _exerciseController,
+              decoration: InputDecoration(
+                labelText: 'Exercise',
+                labelStyle: TextStyle(color: accentColor),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                hintText: 'e.g., Morning Jog, Weight Training',
+                prefixIcon: Icon(Icons.directions_run, color: accentColor),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                // Date picker
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: Icon(Icons.calendar_today, color: Colors.white),
+                    label: Text(
+                      _selectedDate == null
+                          ? 'Pick Date'
+                          : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _selectDate,
+                  ),
+                ),
+
+                const SizedBox(width: 15),
+
+                // Time picker
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: Icon(Icons.access_time, color: Colors.white),
+                    label: Text(
+                      _selectedTime == null
+                          ? 'Pick Time'
+                          : _selectedTime!.format(context),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _selectTime,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Duration input
+            TextField(
+              controller: _durationController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Duration',
+                labelStyle: TextStyle(color: accentColor),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                prefixIcon: Icon(Icons.timer, color: accentColor),
+                suffixText: 'min',
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            //  Energy Expended input
+            TextField(
+              controller: _energyController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Energy Expended',
+                labelStyle: TextStyle(color: accentColor),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                prefixIcon: Icon(
+                  Icons.local_fire_department,
+                  color: accentColor,
+                ),
+                suffixText: 'kcal',
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            //  Save Button
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                elevation: 3,
+              ),
+              onPressed: () {
+                // Save logic
+              },
+              child: const Text(
+                'SAVE WORKOUT',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
