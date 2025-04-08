@@ -45,6 +45,25 @@ class UserRecordService {
         .snapshots();
   }
 
+  // Modified to return a Query
+  Query<UserRecord> getFriendMonthUserRecordsQuery(
+    String userUid, {
+    DateTime? selectedMonth,
+  }) {
+    DateTime now = selectedMonth ?? DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 1);
+
+    return _userRecordRef
+        .where('userUid', isEqualTo: userUid)
+        .where(
+          'createdAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+        )
+        .where('createdAt', isLessThan: Timestamp.fromDate(endOfMonth))
+        .orderBy('createdAt', descending: true);
+  }
+
   Future<void> addUserRecord(UserRecord userRecord) async {
     try {
       await _userRecordRef.add(userRecord);

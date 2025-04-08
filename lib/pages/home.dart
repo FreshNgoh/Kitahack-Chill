@@ -140,7 +140,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                               height: 50,
                               fit: BoxFit.cover,
                             ),
-                            title: Text("${record.calories} kcal"),
+                            title: Text("${record.calories} CAL"),
                             subtitle: Text(record.recommendation ?? ''),
                             trailing: Text(
                               "${record.createdAt?.toDate().day}/${record.createdAt?.toDate().month}",
