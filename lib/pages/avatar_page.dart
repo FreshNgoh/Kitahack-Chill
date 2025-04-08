@@ -178,7 +178,6 @@ class _AvatarPageState extends State<AvatarPage> {
   Widget build(BuildContext context) {
     final currentColor = getCalorieColor(netCalories);
     return Scaffold(
-      appBar: AppBar(title: const Text('Avatar')),
       body:
           _currentUser == null
               ? const Center(child: CircularProgressIndicator())

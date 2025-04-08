@@ -60,7 +60,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final listViewMaxHeight = screenHeight * 0.5;
+    final listViewMaxHeight = screenHeight * 0.3;
 
     return Scaffold(
       body: SingleChildScrollView(
