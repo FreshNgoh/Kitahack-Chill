@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application/services/user_record/user_record.dart';
 import 'package:flutter_application/models/user_record.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class NutritionScreen extends StatefulWidget {
   const NutritionScreen({super.key});
@@ -24,37 +25,43 @@ class _NutritionScreenState extends State<NutritionScreen> {
 
   final _userRecordService = UserRecordService();
   late final String _currentUserId;
+  DateTime? _selectedMonth = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    _selectedMonth = DateTime.now();
   }
 
   File? _selectedImage;
 
-  int _selectedDay = DateTime.now().weekday;
   final double totalCalories = 2000;
   double get remainingCalories => 1700;
 
-  final List<String> days = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
-
-  void _changeDay(int direction) {
+  void _changeMonth(int direction) {
     setState(() {
-      _selectedDay = (_selectedDay + direction).clamp(1, 7);
+      if (_selectedMonth == null) {
+        _selectedMonth = DateTime.now();
+      }
+      int currentMonth = _selectedMonth!.month;
+      int newMonth = currentMonth + direction;
+
+      if (newMonth > 12) {
+        _selectedMonth = DateTime(_selectedMonth!.year + 1, 1);
+      } else if (newMonth < 1) {
+        _selectedMonth = DateTime(_selectedMonth!.year - 1, 12);
+      } else {
+        _selectedMonth = DateTime(_selectedMonth!.year, newMonth);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final listViewMaxHeight = screenHeight * 0.5;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -71,10 +78,12 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
-                    onPressed: () => _changeDay(-1),
+                    onPressed: () => _changeMonth(-1),
                   ),
                   Text(
-                    days[_selectedDay - 1].toUpperCase(),
+                    DateFormat(
+                      'MMMM yyyy',
+                    ).format(_selectedMonth!).toUpperCase(),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -83,69 +92,69 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
-                    onPressed: () => _changeDay(1),
+                    onPressed: () => _changeMonth(1),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
-              // _buildCalorieCard(),
-              StreamBuilder<QuerySnapshot<UserRecord>>(
-                stream: _userRecordService.getCurrentMonthUserRecords(
-                  _currentUserId,
-                ),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: listViewMaxHeight),
+                child: StreamBuilder<QuerySnapshot<UserRecord>>(
+                  stream: _userRecordService.getCurrentMonthUserRecords(
+                    _currentUserId,
+                    selectedMonth: _selectedMonth,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: SelectableText("Error: ${snapshot.error}"),
-                    );
-                  }
-
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(
-                      child: Text("No records for this month."),
-                    );
-                  }
-
-                  final records =
-                      snapshot.data!.docs.map((doc) => doc.data()).toList();
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: records.length,
-                    itemBuilder: (context, index) {
-                      final record = records[index];
-
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          leading: Image.network(
-                            record.imageUrl ?? '',
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                          ),
-                          title: Text("${record.calories} kcal"),
-                          subtitle: Text(record.recommendation ?? ''),
-                          trailing: Text(
-                            "${record.createdAt?.toDate().day}/${record.createdAt?.toDate().month}",
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: SelectableText("Error: ${snapshot.error}"),
                       );
-                    },
-                  );
-                },
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                        child: Text("No records for this month."),
+                      );
+                    }
+
+                    final records =
+                        snapshot.data!.docs.map((doc) => doc.data()).toList();
+
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics:
+                          const AlwaysScrollableScrollPhysics(), // Enable scrolling if overflow
+                      itemCount: records.length,
+                      itemBuilder: (context, index) {
+                        final record = records[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: Image.network(
+                              record.imageUrl ?? '',
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                            ),
+                            title: Text("${record.calories} kcal"),
+                            subtitle: Text(record.recommendation ?? ''),
+                            trailing: Text(
+                              "${record.createdAt?.toDate().day}/${record.createdAt?.toDate().month}",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-
               const SizedBox(height: 10),
-              // _buildNutrientRow(),
               _buildActionButtons(),
-
               if (_showCookSection) ...[
                 _selectedImage == null
                     ? Column(
@@ -157,98 +166,13 @@ class _NutritionScreenState extends State<NutritionScreen> {
                     : _buildImagePreviewSection(),
               ],
               if (_showRestaurantSection)
-                SizedBox(height: 270, child: RestaurantScreen()),
+                const SizedBox(height: 270, child: RestaurantScreen()),
             ],
           ),
         ),
       ),
     );
   }
-
-  // Widget _buildCalorieCard() {
-  //   return Stack(
-  //     alignment: Alignment.center,
-  //     children: [
-  //       SizedBox(
-  //         width: 170,
-  //         height: 160,
-  //         child: CircularProgressIndicator(
-  //           value: (totalCalories - remainingCalories) / totalCalories,
-  //           strokeWidth: 20,
-  //           backgroundColor: Colors.grey[200],
-  //           valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-  //         ),
-  //       ),
-  //       Column(
-  //         children: [
-  //           Text(
-  //             remainingCalories.toStringAsFixed(0),
-  //             style: const TextStyle(
-  //               fontSize: 30,
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.blue,
-  //             ),
-  //           ),
-  //           Text(
-  //             'Kcal left',
-  //             style: TextStyle(fontSize: 15, color: Colors.grey[600]),
-  //           ),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // Widget _buildNutrientRow() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //     children: [
-  //       _buildNutrientItem('Carbs', '60g left', 0.4, Colors.green),
-  //       _buildNutrientItem('Protein', '100g left', 0.9, Colors.purple),
-  //       _buildNutrientItem('Fat', '50g left', 0.5, Colors.orange),
-  //     ],
-  //   );
-  // }
-
-  // Widget _buildNutrientItem(
-  //   String title,
-  //   String subtitle,
-  //   double progressValue,
-  //   Color color,
-  // ) {
-  //   return Flexible(
-  //     child: Container(
-  //       padding: const EdgeInsets.all(16),
-  //       margin: const EdgeInsets.symmetric(horizontal: 20),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //             title,
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.bold,
-  //               color: Colors.grey[700],
-  //             ),
-  //           ),
-  //           const SizedBox(height: 2),
-  //           Text(
-  //             subtitle,
-  //             style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-  //           ),
-  //           const SizedBox(height: 6),
-  //           LinearProgressIndicator(
-  //             value: progressValue,
-  //             minHeight: 6,
-  //             borderRadius: BorderRadius.circular(4),
-  //             backgroundColor: Colors.grey[200],
-  //             valueColor: AlwaysStoppedAnimation<Color>(color),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildActionButtons() {
     return Padding(

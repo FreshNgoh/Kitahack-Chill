@@ -211,8 +211,6 @@ class _AvatarPageState extends State<AvatarPage> {
 }
 
 
-
-
 // class AvatarPage extends StatelessWidget {
 //   const AvatarPage({super.key});
 
