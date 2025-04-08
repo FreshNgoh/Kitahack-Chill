@@ -9,6 +9,7 @@ class UserModel {
   Timestamp? updatedAt;
   String userRecordId;
   List<String> friends;
+  int? faceIndex;
 
   UserModel({
     required this.username,
@@ -19,6 +20,7 @@ class UserModel {
     this.updatedAt,
     this.userRecordId = "",
     this.friends = const [],
+    this.faceIndex = 10, // Default value here
   });
 
   UserModel.fromJson(Map<String, Object?> json)
@@ -30,6 +32,7 @@ class UserModel {
         userRecordId: json['userRecordId']! as String,
         friends:
             (json['friends'] as List<dynamic>).map((e) => e as String).toList(),
+        faceIndex: json['faceIndex'] as int? ?? 1,
       );
 
   UserModel copyWith({
@@ -42,6 +45,7 @@ class UserModel {
     Timestamp? updatedAt,
     String? userRecordId,
     List<String>? friends,
+    int? faceIndex,
   }) {
     return UserModel(
       username: username ?? this.username,
@@ -52,6 +56,7 @@ class UserModel {
       updatedAt: updatedAt ?? this.updatedAt,
       userRecordId: userRecordId ?? this.userRecordId,
       friends: friends ?? this.friends,
+      faceIndex: faceIndex ?? this.faceIndex,
     );
   }
 
@@ -65,6 +70,7 @@ class UserModel {
       'updatedAt': updatedAt ?? FieldValue.serverTimestamp(),
       'userRecordId': userRecordId,
       'friends': friends,
+      'faceIndex': faceIndex,
     };
   }
 }

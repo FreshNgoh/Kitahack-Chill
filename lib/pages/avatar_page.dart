@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -27,9 +28,11 @@ class _AvatarPageState extends State<AvatarPage> {
   final UserService _userService = UserService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey _avatarKey = GlobalKey();
+  final Random _random = Random();
   bool _isUploading = false;
   bool _isAvatarRandomized = false; // Track if the avatar has been randomized
   bool _isRandomizingAvatar = false;
+  int _randomizeCount = 0;
 
   int caloriesTaken = 2000;
   int caloriesBurnt = 50;
@@ -66,14 +69,67 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 
   void _randomizeAvatar() {
+    int? _accessoriesIndex;
+    int? _eyesIndex;
+    int? _eyebrowsIndex;
+    int? _faceIndex; // Fixed face
+    int? _glassesIndex;
+    int? _hairIndex;
+    int? _mouthIndex;
+    int? _noseIndex;
+    int? _detailsIndex;
+    int? _festivalIndex; // Assuming these exist in NotionAvatarController
+
     setState(() {
       _isRandomizingAvatar = true;
     });
-    // Optionally, you might want to immediately trigger the first random avatar:
-    _avatarController?.random();
-    setState(() {
-      _isAvatarRandomized = true;
-    });
+
+    void generateRandomWithoutFace() {
+      const int accessoriesMax = 14;
+      const int eyesMax = 13;
+      const int eyebrowsMax = 15;
+      const int glassesMax = 14;
+      const int hairMax = 58;
+      const int mouthMax = 19;
+      const int noseMax = 13;
+      const int detailsMax = 13;
+      const int festivalMax = 2; // Example
+
+      _accessoriesIndex = _random.nextInt(accessoriesMax);
+      _eyesIndex = _random.nextInt(eyesMax);
+      _eyebrowsIndex = _random.nextInt(eyebrowsMax);
+      _faceIndex =
+          _currentUser?.faceIndex ??
+          10; // Fixed face, to follow the user database one
+      _glassesIndex = _random.nextInt(glassesMax);
+      _hairIndex = _random.nextInt(hairMax);
+      _mouthIndex = _random.nextInt(mouthMax);
+      _noseIndex = _random.nextInt(noseMax);
+      _detailsIndex = _random.nextInt(detailsMax);
+      _festivalIndex = _random.nextInt(festivalMax);
+
+      _avatarController?.setAccessories(_accessoriesIndex!);
+      _avatarController?.setEyes(_eyesIndex!);
+      _avatarController?.setEyebrows(_eyebrowsIndex!);
+      _avatarController?.setFace(_faceIndex!);
+      _avatarController?.setGlasses(_glassesIndex!);
+      _avatarController?.setHair(_hairIndex!);
+      _avatarController?.setMouth(_mouthIndex!);
+      _avatarController?.setNose(_noseIndex!);
+      _avatarController?.setDetails(_detailsIndex!);
+      _avatarController?.setFestival(_festivalIndex!);
+    }
+
+    if (_randomizeCount < 1) {
+      _randomizeCount++;
+      // Call generateRandomWithoutFace but don't set _isAvatarRandomized yet
+      generateRandomWithoutFace();
+    } else {
+      generateRandomWithoutFace();
+      setState(() {
+        _isAvatarRandomized = true;
+      });
+    }
   }
 
   Future<void> _confirmAndUploadAvatar() async {
@@ -281,11 +337,11 @@ class _AvatarPageState extends State<AvatarPage> {
                                     width: 225,
                                     height: 225,
                                     child:
-                                        _isRandomizingAvatar
+                                        _isRandomizingAvatar ||
+                                                _isAvatarRandomized
                                             ? StatefulBuilder(
                                               builder: (context, setState) {
                                                 return NotionAvatar(
-                                                  useRandom: true,
                                                   onCreated: (controller) {
                                                     _avatarController =
                                                         controller;
