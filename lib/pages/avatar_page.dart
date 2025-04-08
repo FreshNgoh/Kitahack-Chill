@@ -1,6 +1,18 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_notion_avatar/flutter_notion_avatar.dart';
 import 'package:flutter_notion_avatar/flutter_notion_avatar_controller.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../models/user.dart';
+import '../services/storage/upload_service.dart';
+import '../services/user/user_service.dart';
 
 class AvatarPage extends StatefulWidget {
   const AvatarPage({super.key});
@@ -10,7 +22,15 @@ class AvatarPage extends StatefulWidget {
 }
 
 class _AvatarPageState extends State<AvatarPage> {
-  NotionAvatarController? controller;
+  NotionAvatarController? _avatarController;
+  UserModel? _currentUser;
+  final UserService _userService = UserService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GlobalKey _avatarKey = GlobalKey();
+  bool _isUploading = false;
+  bool _isAvatarRandomized = false; // Track if the avatar has been randomized
+  bool _isRandomizingAvatar = false;
+
   int caloriesTaken = 2000;
   int caloriesBurnt = 50;
 
@@ -27,134 +47,333 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    setState(() {});
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      final UserModel? fetchedUser = await _userService.getUser(user.uid);
+      if (fetchedUser != null) {
+        setState(() {
+          _currentUser = fetchedUser;
+        });
+      }
+    }
+  }
+
+  void _randomizeAvatar() {
+    setState(() {
+      _isRandomizingAvatar = true;
+    });
+    // Optionally, you might want to immediately trigger the first random avatar:
+    _avatarController?.random();
+    setState(() {
+      _isAvatarRandomized = true;
+    });
+  }
+
+  Future<void> _confirmAndUploadAvatar() async {
+    bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Save Avatar'),
+          content: const Text('Do you want to update your avatar?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      _uploadNewAvatar();
+    }
+  }
+
+  Future<Uint8List?> _captureAvatarAsBytes() async {
+    try {
+      final boundary =
+          _avatarKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      if (boundary == null) {
+        print("Error: RenderRepaintBoundary not found.");
+        return null;
+      }
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print("Error capturing avatar: $e");
+      return null;
+    }
+  }
+
+  Future<void> _uploadNewAvatar() async {
+    setState(() {
+      _isUploading = true;
+    });
+    final Uint8List? avatarBytes = await _captureAvatarAsBytes();
+    if (avatarBytes != null) {
+      File? tempFile;
+      try {
+        final tempDir = await getTemporaryDirectory();
+        tempFile = File(
+          '${tempDir.path}/avatar_${DateTime.now().millisecondsSinceEpoch}.png',
+        );
+        await tempFile.writeAsBytes(avatarBytes);
+
+        final String? avatarUrl = await UploadService.uploadImageToFirebase(
+          tempFile,
+        );
+
+        if (avatarUrl != null) {
+          final User? user = _auth.currentUser;
+          if (user != null) {
+            await _userService.updateUser(user.uid, {'imageUrl': avatarUrl});
+            _loadCurrentUser(); // Reload user data to show the new avatar
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Avatar updated successfully!')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to upload new avatar.')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error uploading avatar: $e')));
+        print('Error uploading avatar: $e');
+      } finally {
+        await tempFile?.delete();
+        setState(() {
+          _isUploading = false;
+          _isAvatarRandomized = false; // Reset state after upload
+        });
+      }
+    } else {
+      setState(() {
+        _isUploading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to capture avatar.')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentColor = getCalorieColor(netCalories);
-
-    return Stack(
-      children: [
-        Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
+    return Scaffold(
+      body:
+          _currentUser == null
+              ? const Center(child: CircularProgressIndicator())
+              : Stack(
                 children: [
-                  // Net Calories Card
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: currentColor.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: currentColor, width: 2),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
                           children: [
-                            Icon(
-                              _getStatusIcon(),
-                              color: currentColor,
-                              size: 28,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Net Calories',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: currentColor,
-                                fontWeight: FontWeight.w500,
+                            // ... (Your existing calorie widgets) ...
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                                vertical: 16,
                               ),
+                              decoration: BoxDecoration(
+                                color: currentColor.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: currentColor,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        _getStatusIcon(),
+                                        color: currentColor,
+                                        size: 28,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Net Calories',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          color: currentColor,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${netCalories}cal', // Replace with actual netCalories
+                                    style: TextStyle(
+                                      fontSize: 32,
+                                      color: currentColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildSecondaryStat(
+                                  'Calories Taken',
+                                  caloriesTaken,
+                                  Icons.local_dining,
+                                  currentColor,
+                                ),
+                                _buildVerticalDivider(currentColor),
+                                _buildSecondaryStat(
+                                  'Calories Burnt',
+                                  caloriesBurnt,
+                                  Icons.directions_run,
+                                  currentColor,
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${netCalories}cal',
-                          style: TextStyle(
-                            fontSize: 32,
-                            color: currentColor,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Avatar Container
+                      Center(
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: 300,
+                              height: 300,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(150),
+                                border: Border.all(
+                                  color: currentColor,
+                                  width: 4,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(150),
+                                child: RepaintBoundary(
+                                  key: _avatarKey,
+                                  child: SizedBox(
+                                    width: 225,
+                                    height: 225,
+                                    child:
+                                        _isRandomizingAvatar
+                                            ? StatefulBuilder(
+                                              builder: (context, setState) {
+                                                return NotionAvatar(
+                                                  useRandom: true,
+                                                  onCreated: (controller) {
+                                                    _avatarController =
+                                                        controller;
+                                                  },
+                                                );
+                                              },
+                                            )
+                                            : _currentUser?.imageUrl != null
+                                            ? Image.network(
+                                              _currentUser!.imageUrl!,
+                                              fit: BoxFit.cover,
+                                              loadingBuilder: (
+                                                BuildContext context,
+                                                Widget child,
+                                                ImageChunkEvent?
+                                                loadingProgress,
+                                              ) {
+                                                if (loadingProgress == null) {
+                                                  return child;
+                                                }
+                                                return Center(
+                                                  child: CircularProgressIndicator(
+                                                    value:
+                                                        loadingProgress
+                                                                    .expectedTotalBytes !=
+                                                                null
+                                                            ? loadingProgress
+                                                                    .cumulativeBytesLoaded /
+                                                                loadingProgress
+                                                                    .expectedTotalBytes!
+                                                            : null,
+                                                  ),
+                                                );
+                                              },
+                                              errorBuilder: (
+                                                BuildContext context,
+                                                Object error,
+                                                StackTrace? stackTrace,
+                                              ) {
+                                                return const Icon(Icons.error);
+                                              },
+                                            )
+                                            : const SizedBox(), // Or a default placeholder if no image and not randomizing
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (_isUploading)
+                              const Positioned.fill(
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Taken and Burnt Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildSecondaryStat(
-                        'Calories Taken',
-                        caloriesTaken,
-                        Icons.local_dining,
-                        currentColor,
                       ),
-                      _buildVerticalDivider(currentColor),
-                      _buildSecondaryStat(
-                        'Calories Burnt',
-                        caloriesBurnt,
-                        Icons.directions_run,
-                        currentColor,
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _isUploading ? null : _randomizeAvatar,
+                        child: const Text('Randomize Avatar'),
                       ),
+                      const SizedBox(height: 10),
+                      if (_isAvatarRandomized)
+                        ElevatedButton(
+                          onPressed:
+                              _isUploading ? null : _confirmAndUploadAvatar,
+                          child: const Text('Save Avatar'),
+                        ),
                     ],
+                  ),
+                  // Add Button (Keep if you need it)
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        /* Add action */
+                      },
+                      backgroundColor: currentColor.withOpacity(0.7),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-
-            SizedBox(height: 20),
-            // Avatar Container
-            Center(
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(150),
-                  border: Border.all(color: currentColor, width: 4),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(150),
-                  child: NotionAvatar(
-                    useRandom: true,
-                    onCreated: (controller) => this.controller = controller,
-                  ),
-                ),
-              ),
-            ),
-
-            // Random Button
-            TextButton(
-              onPressed: () => controller?.random(),
-              child: Text(
-                'Randomize Avatar',
-                style: TextStyle(
-                  color: currentColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        // Add Button
-        Positioned(
-          bottom: 20,
-          right: 20,
-          child: FloatingActionButton(
-            onPressed: () {
-              /* Add action */
-            },
-            backgroundColor: currentColor.withOpacity(0.7),
-            child: Icon(Icons.add, color: Colors.white, size: 32),
-          ),
-        ),
-      ],
     );
   }
 
@@ -209,8 +428,6 @@ class _AvatarPageState extends State<AvatarPage> {
     );
   }
 }
-
-
 
 
 // class AvatarPage extends StatelessWidget {
@@ -396,5 +613,6 @@ class _AvatarPageState extends State<AvatarPage> {
 //     );
 //   }
 // }
+
 
 

@@ -224,4 +224,26 @@ class UserService {
   Stream<DocumentSnapshot<UserModel>> getUserDataStream(String userUid) {
     return _usersRef.doc(userUid).snapshots();
   }
+
+  // *** New method to get a single user by UID ***
+  Future<UserModel?> getUser(String uid) async {
+    try {
+      final DocumentSnapshot<UserModel> userDoc =
+          await _usersRef.doc(uid).get();
+      return userDoc.data();
+    } catch (e) {
+      print("🔥 Error fetching user: $e");
+      return null;
+    }
+  }
+
+  // *** New method to update user data ***
+  Future<void> updateUser(String uid, Map<String, dynamic> data) async {
+    try {
+      await _usersRef.doc(uid).update(data);
+    } catch (e) {
+      print("🔥 Error updating user: $e");
+      rethrow; // Re-throw the error to be caught in the UI
+    }
+  }
 }

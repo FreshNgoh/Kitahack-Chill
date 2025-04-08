@@ -26,17 +26,42 @@ class UserRecordService {
     return _userRecordRef.snapshots();
   }
 
-  Stream<QuerySnapshot<UserRecord>> getCurrentMonthUserRecords(String userUid) {
-    final now = DateTime.now();
+  Stream<QuerySnapshot<UserRecord>> getCurrentMonthUserRecords(
+    String userUid, {
+    DateTime? selectedMonth, // Added the optional selectedMonth parameter
+  }) {
+    DateTime now = selectedMonth ?? DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
     final endOfMonth = DateTime(now.year, now.month + 1, 1);
 
     return _userRecordRef
         .where('userUid', isEqualTo: userUid)
-        .where('createdAt', isGreaterThanOrEqualTo: startOfMonth)
-        .where('createdAt', isLessThan: endOfMonth)
+        .where(
+          'createdAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+        )
+        .where('createdAt', isLessThan: Timestamp.fromDate(endOfMonth))
         .orderBy('createdAt', descending: true)
         .snapshots();
+  }
+
+  // Modified to return a Query
+  Query<UserRecord> getFriendMonthUserRecordsQuery(
+    String userUid, {
+    DateTime? selectedMonth,
+  }) {
+    DateTime now = selectedMonth ?? DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 1);
+
+    return _userRecordRef
+        .where('userUid', isEqualTo: userUid)
+        .where(
+          'createdAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+        )
+        .where('createdAt', isLessThan: Timestamp.fromDate(endOfMonth))
+        .orderBy('createdAt', descending: true);
   }
 
   Future<void> addUserRecord(UserRecord userRecord) async {
