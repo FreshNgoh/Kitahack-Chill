@@ -35,9 +35,37 @@ class _AvatarPageState extends State<AvatarPage> {
   int _randomizeCount = 0;
 
   int caloriesTaken = 2000;
-  int caloriesBurnt = 50;
+  int caloriesBurnt = 300;
 
   int get netCalories => caloriesTaken - caloriesBurnt;
+
+  List<int> _thinnestFaces = [3, 2, 14]; // Highest to lowest
+  List<int> _fattestFaces = [13, 9, 11]; // Highest to lowest
+  int _normalFace = 10;
+
+  int _getFaceIndexBasedOnCalories() {
+    if (netCalories > 1000) {
+      // Example threshold for fattest
+      return _fattestFaces.first; // Highest of fattest
+    } else if (netCalories > 500) {
+      // Example threshold for middle fattest
+      return _fattestFaces[1];
+    } else if (netCalories > 100) {
+      // Example threshold for lowest fattest
+      return _fattestFaces.last;
+    } else if (netCalories < -1000) {
+      // Example threshold for thinnest
+      return _thinnestFaces.first; // Highest of thinnest
+    } else if (netCalories < -500) {
+      // Example threshold for middle thinnest
+      return _thinnestFaces[1];
+    } else if (netCalories < -100) {
+      // Example threshold for lowest thinnest
+      return _thinnestFaces.last;
+    } else {
+      return _normalFace;
+    }
+  }
 
   Color getCalorieColor(int calories) {
     if (calories > 3080) {
@@ -52,7 +80,7 @@ class _AvatarPageState extends State<AvatarPage> {
   @override
   void initState() {
     super.initState();
-    _loadCurrentUser();
+    _loadCurrentUserAndUpdateAvatar();
   }
 
   Future<void> _loadCurrentUser() async {
@@ -66,6 +94,28 @@ class _AvatarPageState extends State<AvatarPage> {
         });
       }
     }
+  }
+
+  Future<void> _updateAvatarBasedOnCalories() async {
+    if (_currentUser != null) {
+      final newFaceIndex = _getFaceIndexBasedOnCalories();
+      if (_currentUser?.faceIndex != newFaceIndex) {
+        await _userService.updateUser(_currentUser!.uid, {
+          'faceIndex': newFaceIndex,
+        });
+        await _uploadCurrentAvatar();
+        await _loadCurrentUser(); // Reload to reflect the new imageUrl
+      } else if (_currentUser?.imageUrl == null) {
+        // If faceIndex is the same but no image, capture and update
+        await _uploadCurrentAvatar();
+        await _loadCurrentUser();
+      }
+    }
+  }
+
+  Future<void> _loadCurrentUserAndUpdateAvatar() async {
+    await _loadCurrentUser();
+    await _updateAvatarBasedOnCalories();
   }
 
   void _randomizeAvatar() {
@@ -173,6 +223,68 @@ class _AvatarPageState extends State<AvatarPage> {
     } catch (e) {
       print("Error capturing avatar: $e");
       return null;
+    }
+  }
+
+  Future<void> _uploadCurrentAvatar() async {
+    setState(() {
+      _isUploading = true;
+    });
+    print("Uploading current avatar...");
+    final Uint8List? avatarBytes = await _captureAvatarAsBytes();
+    if (avatarBytes != null) {
+      File? tempFile;
+      try {
+        final tempDir = await getTemporaryDirectory();
+        tempFile = File(
+          '${tempDir.path}/avatar_calorie_${DateTime.now().millisecondsSinceEpoch}.png', // Corrected interpolation
+        );
+        await tempFile.writeAsBytes(avatarBytes);
+
+        final String? avatarUrl = await UploadService.uploadImageToFirebase(
+          tempFile,
+        );
+
+        if (avatarUrl != null && _currentUser != null) {
+          await _userService.updateUser(_currentUser!.uid, {
+            'imageUrl': avatarUrl,
+          });
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Avatar updated based on calories.'),
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to update avatar.')),
+            );
+          }
+        }
+      } catch (e) {
+        print('Error updating avatar: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error updating avatar: $e')));
+        }
+      } finally {
+        await tempFile?.delete();
+        setState(() {
+          _isUploading = false;
+        });
+      }
+    } else {
+      setState(() {
+        _isUploading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to capture avatar.')),
+        );
+      }
     }
   }
 
@@ -484,191 +596,3 @@ class _AvatarPageState extends State<AvatarPage> {
     );
   }
 }
-
-
-// class AvatarPage extends StatelessWidget {
-//   const AvatarPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Padding(
-//         padding: const EdgeInsets.all(20),
-//         child: Column(
-//           children: [
-//             // Row 1: Header + Info | 3D Viewer
-//             Expanded(
-//               child: Row(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   // Column 1: Header and Info
-//                   Expanded(
-//                     flex: 4,
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: [
-//                             Row(
-//                               crossAxisAlignment: CrossAxisAlignment.baseline,
-//                               textBaseline: TextBaseline.alphabetic,
-//                               children: [
-//                                 const Text(
-//                                   'Calories',
-//                                   style: TextStyle(
-//                                     fontSize: 20,
-//                                     fontWeight: FontWeight.bold,
-//                                     color: Colors.black87,
-//                                   ),
-//                                 ),
-//                                 const SizedBox(width: 3),
-//                                 Text(
-//                                   '/week',
-//                                   style: TextStyle(
-//                                     fontSize: 14,
-//                                     fontWeight: FontWeight.w500,
-//                                     color: Colors.grey[600],
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                             Text(
-//                               '1000',
-//                               style: TextStyle(
-//                                 fontSize: 55,
-//                                 fontWeight: FontWeight.w500,
-//                                 color: Colors.black87,
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-
-//                         const SizedBox(height: 25),
-
-//                         _buildMetricItem(
-//                           icon: Icons.local_fire_department,
-//                           iconColor:
-//                               Colors.deepOrangeAccent, // Custom icon color
-//                           value: '1,840',
-//                           label: 'calories',
-//                         ),
-//                         const SizedBox(height: 25),
-//                         _buildMetricItem(
-//                           icon: Icons.directions_walk,
-//                           iconColor: Colors.green,
-//                           value: '3,248',
-//                           label: 'steps',
-//                         ),
-//                         const SizedBox(height: 25),
-//                         _buildMetricItem(
-//                           icon: Icons.access_time,
-//                           iconColor: Colors.blueAccent,
-//                           value: '6.5',
-//                           label: 'hours',
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-
-//                   // Column 2: 3D
-//                   Expanded(
-//                     flex: 6,
-//                     child: const Flutter3DViewer(
-//                       src: "assets/3d/human_body.glb",
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-
-//             // Row 2: Action Boxes
-//             Container(
-//               height: 100,
-//               padding: const EdgeInsets.all(0),
-//               margin: EdgeInsets.only(bottom: 20),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                 children: [
-//                   _buildActionBox(Colors.blue, 'Exercise'),
-//                   _buildActionBox(Colors.green, 'Diet'),
-//                   _buildActionBox(Colors.orange, 'Sleep'),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildActionBox(Color color, String label) {
-//     return Flexible(
-//       child: InkWell(
-//         splashColor: color.withOpacity(0.3),
-//         highlightColor: color.withOpacity(0.1),
-//         borderRadius: BorderRadius.circular(12),
-//         onTap: () {
-//           // click handler here
-//         },
-//         child: Container(
-//           width: 110,
-//           decoration: BoxDecoration(
-//             color: color.withOpacity(0.2),
-//             borderRadius: BorderRadius.circular(12),
-//           ),
-//           padding: const EdgeInsets.all(12),
-//           child: Center(
-//             child: Text(
-//               label,
-//               style: TextStyle(
-//                 fontSize: 18,
-//                 fontWeight: FontWeight.w600,
-//                 color: color,
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildMetricItem({
-//     required IconData icon,
-//     required Color iconColor,
-//     required String value,
-//     required String label,
-//     double labelSize = 15,
-//   }) {
-//     return Row(
-//       children: [
-//         Icon(icon, size: 40, color: iconColor),
-//         const SizedBox(width: 15),
-//         Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               value,
-//               style: const TextStyle(
-//                 fontSize: 20,
-//                 fontWeight: FontWeight.w600,
-//                 color: Colors.black87,
-//               ),
-//             ),
-//             Text(
-//               label,
-//               style: TextStyle(
-//                 fontSize: labelSize,
-//                 fontWeight: FontWeight.w500,
-//                 color: Colors.grey, // Constant gray color
-//               ),
-//             ),
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-
-
