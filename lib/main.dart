@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
           fontFamily: "Poppins",
           scaffoldBackgroundColor: Colors.white,
         ),
-        home: AuthWrapper(),
+        home: Bar(),
       ),
     );
   }
