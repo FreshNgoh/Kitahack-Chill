@@ -35,6 +35,6 @@ EatMeh is a mobile application designed to help users effortlessly track their d
 `lib/main.dart` – The entry point of the app. This is where the app starts and is configured, including theme, routes, and initializations.
 
 ## Pubspec.yaml
-To add new packages, start from `line 29: dependencies`
-To add assests to this application, add an assests section start from `line 84: assests`
-To add custom fonts to this application, add a fonts section start from `line 100: fonts`
+1. To add new packages, start from `line 29: dependencies`
+2. To add assests to this application, add an assests section start from `line 84: assests`
+3. To add custom fonts to this application, add a fonts section start from `line 100: fonts`
