@@ -69,9 +69,9 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 
   Color getCalorieColor(int calories) {
-    if (calories > 3080) {
+    if (calories > 700) {
       return Colors.red[400]!;
-    } else if (calories >= 2520) {
+    } else if (calories >= 400) {
       return Colors.orange[400]!;
     } else {
       return Colors.green[400]!;
@@ -657,7 +657,17 @@ class _AvatarPageState extends State<AvatarPage> {
                     right: 20,
                     child: FloatingActionButton(
                       onPressed: () {
-                        /* Add action */
+                        showModalBottomSheet(
+                          context: context,
+                          isDismissible: true,
+                          enableDrag: true,
+                          backgroundColor: Colors.white,
+                          isScrollControlled:
+                              true, // Allows the sheet to resize for keyboard
+                          builder: (BuildContext context) {
+                            return const InputBottomSheet();
+                          },
+                        );
                       },
                       backgroundColor: currentColor.withOpacity(0.7),
                       child: const Icon(
@@ -773,8 +783,8 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
   }
 
   Widget build(BuildContext context) {
-    final Color primaryColor = Colors.indigo;
-    final Color accentColor = Colors.indigoAccent;
+    final Color primaryColor = Colors.black87;
+    final Color accentColor = Colors.black54;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(

@@ -4,7 +4,6 @@ import 'package:flutter_application/pages/camera_page.dart';
 import 'package:flutter_application/pages/friend_page.dart';
 import 'package:flutter_application/pages/home.dart';
 import 'package:flutter_application/pages/profile_page.dart';
-import 'package:flutter_application/pages/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application/pages/friend_request_page.dart';
 
@@ -32,6 +31,23 @@ class Bar extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text("Hi, $username"), //replace
           ),
+
+          // Future implementation of Avatar
+          // child: Row(
+          //     children: [
+          //       CircleAvatar(
+          //         radius: 25,
+          //         backgroundColor: Colors.grey[100],
+          //         backgroundImage:
+          //             user?.photoURL != null
+          //                 ? CachedNetworkImageProvider(user!.photoURL!)
+          //                 : const AssetImage('assets/img/default_avatar.png')
+          //                     as ImageProvider,
+          //       ),
+          //       Text(" $username"),
+          //     ],
+          //   ), //replace
+          // ),
           // backgroundColor: Colors.black,
           actions: [
             IconButton(
@@ -76,7 +92,7 @@ class Bar extends StatelessWidget {
             // splashFactory: NoSplash.splashFactory,
             // overlayColor: MaterialStateProperty.all(Colors.transparent),
             dividerHeight: 0,
-            labelColor: Colors.blue,
+            labelColor: Color(0xFF191919),
             unselectedLabelColor: Colors.black54,
             indicatorColor: Colors.transparent,
             tabs: <Widget>[

@@ -26,9 +26,9 @@ class _CameraPageState extends State<CameraPage> {
   File? _imageFile;
 
   Color getCalorieColor(int calories) {
-    if (calories > 3080) {
+    if (calories > 700) {
       return Colors.red;
-    } else if (calories >= 2520) {
+    } else if (calories >= 300) {
       return Colors.green;
     } else {
       return Colors.orange;
@@ -47,6 +47,7 @@ class _CameraPageState extends State<CameraPage> {
 
   void _showBottomSheet() {
     showModalBottomSheet(
+      backgroundColor: Color(0xFFF6F6F6),
       context: context,
       isDismissible: true,
       enableDrag: true,
@@ -87,7 +88,7 @@ class _CameraPageState extends State<CameraPage> {
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.black,
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Color(0xFFF6F6F6),
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -128,171 +129,6 @@ class _CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     return _imageFile != null
-        // ? Column(
-        //   children: [
-        //     Expanded(
-        //       flex: 7,
-        //       child: Padding(
-        //         padding: const EdgeInsets.all(16.0),
-        //         child: Stack(
-        //           children: [
-        //             ClipRRect(
-        //               borderRadius: BorderRadius.circular(16),
-        //               child: Image.file(
-        //                 _imageFile!,
-        //                 fit: BoxFit.cover,
-        //                 width: double.infinity,
-        //                 height: double.infinity,
-        //               ),
-        //             ),
-        //             //  Close button
-        //             Positioned(
-        //               top: 8,
-        //               left: 8,
-        //               child: IconButton(
-        //                 icon: const Icon(
-        //                   Icons.close,
-        //                   color: Colors.white,
-        //                   size: 28,
-        //                 ),
-        //                 onPressed: () => setState(() => _imageFile = null),
-        //                 style: IconButton.styleFrom(
-        //                   padding: EdgeInsets.zero,
-        //                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        //                 ),
-        //               ),
-        //             ),
-        //             // bottom-right action button
-        //             Positioned(
-        //               bottom: 12,
-        //               right: 12,
-        //               child: Row(
-        //                 children: [
-        //                   _buildActionButton(
-        //                     icon: Icons.send,
-        //                     onPressed: () {
-        //                       /* Add send logic */
-        //                     },
-        //                   ),
-        //                   const SizedBox(width: 8),
-        //                   _buildActionButton(
-        //                     icon: Icons.save,
-        //                     onPressed: () {
-        //                       /* Add save logic */
-        //                     },
-        //                   ),
-        //                 ],
-        //               ),
-        //             ),
-        //           ],
-        //         ),
-        //       ),
-        //     ),
-        //     Expanded(
-        //       flex: 3,
-        //       child: SingleChildScrollView(
-        //         child: Padding(
-        //           padding: const EdgeInsets.symmetric(
-        //             horizontal: 24.0,
-        //             vertical: 16.0,
-        //           ),
-        //           child: Column(
-        //             children: [
-        //               Row(
-        //                 mainAxisAlignment: MainAxisAlignment.start,
-        //                 crossAxisAlignment: CrossAxisAlignment.center,
-        //                 children: [
-        //                   Icon(
-        //                     Icons.local_fire_department,
-        //                     color: getCalorieColor(
-        //                       2520,
-        //                     ), // Use actual calorie value
-        //                     size: 28,
-        //                   ),
-        //                   const SizedBox(width: 4),
-        //                   Text(
-        //                     '2520', // Use actual value
-        //                     style: TextStyle(
-        //                       fontSize: 20,
-        //                       fontWeight: FontWeight.bold,
-        //                       color: getCalorieColor(
-        //                         2520,
-        //                       ), // Use actual calorie value
-        //                     ),
-        //                   ),
-        //                   const SizedBox(width: 4),
-        //                   const Text(
-        //                     'cal',
-        //                     style: TextStyle(fontSize: 14, color: Colors.grey),
-        //                   ),
-        //                 ],
-        //               ),
-        //               const SizedBox(height: 16),
-        //               Align(
-        //                 alignment: Alignment.centerLeft,
-        //                 child: Column(
-        //                   crossAxisAlignment: CrossAxisAlignment.start,
-        //                   children: [
-        //                     RichText(
-        //                       text: TextSpan(
-        //                         children: [
-        //                           WidgetSpan(
-        //                             alignment: PlaceholderAlignment.middle,
-        //                             child: Transform.translate(
-        //                               offset: const Offset(0, -2),
-        //                               child: ShaderMask(
-        //                                 shaderCallback:
-        //                                     (bounds) => const LinearGradient(
-        //                                       colors: [
-        //                                         Color(0xFF4285f4),
-        //                                         Color(0xFF9b72cb),
-        //                                         Color(0xFFd96570),
-        //                                       ],
-        //                                       stops: [0.0, 0.3, 0.60],
-        //                                       begin: Alignment.centerLeft,
-        //                                       end: Alignment.centerRight,
-        //                                     ).createShader(bounds),
-        //                                 child: const Text(
-        //                                   'Gemini ',
-        //                                   style: TextStyle(
-        //                                     fontSize: 18,
-        //                                     fontWeight: FontWeight.w600,
-        //                                     color: Colors.white,
-        //                                   ),
-        //                                 ),
-        //                               ),
-        //                             ),
-        //                           ),
-        //                           const TextSpan(
-        //                             text: 'Suggestion: ',
-        //                             style: TextStyle(
-        //                               fontSize: 18,
-        //                               fontWeight: FontWeight.bold,
-        //                               color: Colors.black,
-        //                               height: 1.2,
-        //                             ),
-        //                           ),
-        //                         ],
-        //                       ),
-        //                     ),
-        //                     const SizedBox(height: 8),
-        //                     const Text(
-        //                       "Smart Kid is a private kindergarten located in Hartamas, Kuala Lumpur, primarily focused on nurturing children aged 3 to 6 years. They are dedicated to developing well-rounded and diverse students, emphasizing not only academics but also emotional and physical growth.To ensure personalized attention, they have structured programs for pre-kindergarten (ages 3–4) and pre-school (ages 5–6). Each intake is limited to 50 students per group (PK/2021 and PS/2021). However, they lack an efficient education system. Teachers and administrative staff currently manage complex schedules, student performance tracking, and parent engagement using manual spreadsheet-based systems, which are time-consuming and inefficient.",
-        //                       style: TextStyle(
-        //                         fontSize: 14,
-        //                         color: Colors.grey,
-        //                       ),
-        //                     ),
-        //                   ],
-        //                 ),
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ],
-        // )
         ? BlocBuilder<ChatBlocBloc, ChatBlocState>(
           builder: (context, state) {
             if (state is ChatLoadingState) {
@@ -439,21 +275,19 @@ class _CameraPageState extends State<CameraPage> {
                     icon: Icon(
                       Icons.refresh,
                       size: 20,
-                      color: const Color.fromARGB(255, 123, 7, 144),
+                      color: Color(0xFF191919),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[100],
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Color(0xFFF6F6F6),
+                      foregroundColor: Color(0xFF191919),
                       padding: const EdgeInsets.symmetric(
                         vertical: 10,
                         horizontal: 20,
                       ),
-                      minimumSize:
-                          Size.zero, // Allows button to shrink-wrap content
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colors.grey[300]!),
                       ),
-                      elevation: 2,
+                      side: BorderSide(color: Colors.black.withAlpha(50)),
                     ),
                     onPressed: () {
                       if (_imageFile != null) {
@@ -705,7 +539,7 @@ class _CameraPageState extends State<CameraPage> {
                               ),
                               const SizedBox(width: 4),
                               const Text(
-                                'Cal',
+                                'kcal',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,

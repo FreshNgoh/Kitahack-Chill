@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -107,7 +108,22 @@ class _FriendPageState extends State<FriendRequestPage> {
                               'No Name'; // Access username property
 
                           return ListTile(
-                            leading: const Icon(Icons.person),
+                            // leading: const Icon(Icons.person),
+                            leading: GestureDetector(
+                              child: CircleAvatar(
+                                radius: 25,
+                                backgroundColor: Colors.grey[100],
+                                backgroundImage:
+                                    friendData?.imageUrl != null
+                                        ? CachedNetworkImageProvider(
+                                          friendData!.imageUrl!,
+                                        )
+                                        : const AssetImage(
+                                              'assets/img/default_avatar.png',
+                                            )
+                                            as ImageProvider,
+                              ),
+                            ),
                             title: Text(friendName),
                             // Add more details or actions for each friend if needed
                           );
@@ -121,7 +137,8 @@ class _FriendPageState extends State<FriendRequestPage> {
         onPressed: () {
           _showAddFriendDialog(context);
         },
-        child: const Icon(Icons.add_circle),
+        backgroundColor: Color(0xFF191919),
+        child: const Icon(Icons.add_circle, color: Colors.white),
       ),
     );
   }
@@ -131,21 +148,36 @@ class _FriendPageState extends State<FriendRequestPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Send Friend Request'),
+          backgroundColor: const Color(0xFFF6F6F6), // Light gray background
+          title: const Text(
+            'Send Friend Request',
+            style: TextStyle(color: Colors.black), // Text color
+          ),
           content: TextField(
             controller: _friendUidController,
-            decoration: const InputDecoration(labelText: 'Enter User ID'),
+            decoration: const InputDecoration(
+              labelText: 'Enter User ID',
+              labelStyle: TextStyle(color: Colors.black54),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.deepPurple),
+              ),
+            ),
+            style: const TextStyle(color: Colors.black),
+            cursorColor: Color(0xFFF6F6F6),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: const Text('Cancel', style: TextStyle(color: Colors.red)),
               onPressed: () {
                 Navigator.of(context).pop();
                 _friendUidController.clear();
               },
             ),
             TextButton(
-              child: const Text('Send'),
+              child: const Text(
+                'Send',
+                style: TextStyle(color: Color(0xFF191919)),
+              ),
               onPressed: () async {
                 final String friendUid = _friendUidController.text.trim();
                 if (friendUid.isNotEmpty && friendUid != _currentUserId) {
@@ -193,7 +225,14 @@ class FriendRequestsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Friend Requests'),
+        // title: const Text('Friend Requests'),
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            "Send Friend Request",
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.black),
         titleTextStyle: TextStyle(color: Colors.black, fontSize: 20),
@@ -248,8 +287,25 @@ class FriendRequestsPage extends StatelessWidget {
                       horizontal: 16,
                       vertical: 8,
                     ),
+                    color: Color(0xFFF6F6F6),
                     child: ListTile(
-                      title: Text('Friend request from $senderUsername'),
+                      title: Text.rich(
+                        TextSpan(
+                          text: 'Friend request from ',
+                          style: const TextStyle(
+                            color: Colors.black,
+                          ), // Normal text style
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: senderUsername,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF191919),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

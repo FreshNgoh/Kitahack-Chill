@@ -58,31 +58,51 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
               itemBuilder: (context, index) {
                 final restaurant = state.restaurants[index];
                 return Card(
-                  margin: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 2,
+                  ),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  color: Color(0xFFF6F6F6),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Restaurant Image
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
+                        // Container(
+                        //   width: 80,
+                        //   height: 80,
+                        //   decoration: BoxDecoration(
+                        //     borderRadius: BorderRadius.circular(8),
+                        //   ),
+                        //   child:
+                        //       restaurant.photos.isNotEmpty
+                        //           ? Image.network(
+                        //             "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos.first.photoReference}&key=$googleAPI",
+                        //             fit: BoxFit.cover,
+                        //             errorBuilder:
+                        //                 (context, error, stackTrace) =>
+                        //                     const Icon(Icons.restaurant),
+                        //           )
+                        //           : const Icon(Icons.restaurant),
+                        // ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos.first.photoReference}&key=$googleAPI",
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    const Icon(Icons.broken_image, size: 60),
                           ),
-                          child:
-                              restaurant.photos.isNotEmpty
-                                  ? Image.network(
-                                    "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos.first.photoReference}&key=$googleAPI",
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Icon(Icons.restaurant),
-                                  )
-                                  : const Icon(Icons.restaurant),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
 
                         // Restaurant Details
                         Expanded(
@@ -134,7 +154,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
                                       horizontal: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[200],
+                                      color: Colors.grey[300],
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
