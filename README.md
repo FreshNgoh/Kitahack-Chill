@@ -22,7 +22,7 @@ EatMeh is a mobile application designed to help users effortlessly track their d
 
 `lib/bloc/` – Contains the BLoC (Business Logic Component) files for state management. This helps in separating UI from business logic, making the app reactive and testable.
 
-`libcomponents/` – Reusable UI widgets or components such as buttons, cards, and custom layouts used across the app.
+`lib/components/` – Reusable UI widgets or components such as buttons, cards, and custom layouts used across the app.
 
 `lib/models/` – Includes data model classes that represent and structure the data used in the app, such as user model or chat model.
 
