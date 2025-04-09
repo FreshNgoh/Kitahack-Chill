@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  Future<void> _randomizeAvatar() async {
+  Future<Map<String, int>> _randomizeAvatar() async {
     int? _accessoriesIndex;
     int? _eyesIndex;
     int? _eyebrowsIndex;
@@ -79,16 +79,28 @@ class _LoginPageState extends State<LoginPage> {
     _detailsIndex = _random.nextInt(detailsMax);
     _festivalIndex = _random.nextInt(festivalMax);
 
-    _avatarController?.setAccessories(_accessoriesIndex!);
-    _avatarController?.setEyes(_eyesIndex!);
-    _avatarController?.setEyebrows(_eyebrowsIndex!);
-    _avatarController?.setFace(_faceIndex!);
-    _avatarController?.setGlasses(_glassesIndex!);
-    _avatarController?.setHair(_hairIndex!);
-    _avatarController?.setMouth(_mouthIndex!);
-    _avatarController?.setNose(_noseIndex!);
-    _avatarController?.setDetails(_detailsIndex!);
-    _avatarController?.setFestival(_festivalIndex!);
+    _avatarController?.setAccessories(_accessoriesIndex);
+    _avatarController?.setEyes(_eyesIndex);
+    _avatarController?.setEyebrows(_eyebrowsIndex);
+    _avatarController?.setFace(_faceIndex);
+    _avatarController?.setGlasses(_glassesIndex);
+    _avatarController?.setHair(_hairIndex);
+    _avatarController?.setMouth(_mouthIndex);
+    _avatarController?.setNose(_noseIndex);
+    _avatarController?.setDetails(_detailsIndex);
+    _avatarController?.setFestival(_festivalIndex);
+
+    return {
+      'accessoriesIndex': _accessoriesIndex,
+      'eyesIndex': _eyesIndex,
+      'eyebrowsIndex': _eyebrowsIndex,
+      'glassesIndex': _glassesIndex,
+      'hairIndex': _hairIndex,
+      'mouthIndex': _mouthIndex,
+      'noseIndex': _noseIndex,
+      'detailsIndex': _detailsIndex,
+      'festivalIndex': _festivalIndex,
+    };
   }
 
   Future<void> _submit() async {
@@ -129,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
           final String uid = user.uid;
           await user.updateDisplayName(username);
 
-          await _randomizeAvatar();
+          final avatarIndices = await _randomizeAvatar();
 
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             final Uint8List? avatarBytes = await _captureAvatarAsBytes();
@@ -155,6 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                       imageUrl: avatarUrl,
                       userRecordId: "",
                       friends: [],
+                      avatarOptions: avatarIndices,
                     );
                     await _userService.addUser(newUser);
                     _showSuccess("Registration successful!");

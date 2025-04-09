@@ -10,6 +10,7 @@ class UserModel {
   String userRecordId;
   List<String> friends;
   int? faceIndex;
+  Map<String, int>? avatarOptions;
 
   UserModel({
     required this.username,
@@ -21,6 +22,7 @@ class UserModel {
     this.userRecordId = "",
     this.friends = const [],
     this.faceIndex = 10, // Default value here
+    this.avatarOptions,
   });
 
   UserModel.fromJson(Map<String, Object?> json)
@@ -33,6 +35,9 @@ class UserModel {
         friends:
             (json['friends'] as List<dynamic>).map((e) => e as String).toList(),
         faceIndex: json['faceIndex'] as int? ?? 1,
+        avatarOptions: (json['avatarOptions'] as Map<String, dynamic>?)?.map(
+          (key, value) => MapEntry(key, value as int),
+        ),
       );
 
   UserModel copyWith({
@@ -46,6 +51,7 @@ class UserModel {
     String? userRecordId,
     List<String>? friends,
     int? faceIndex,
+    Map<String, int>? avatarOptions,
   }) {
     return UserModel(
       username: username ?? this.username,
@@ -57,6 +63,7 @@ class UserModel {
       userRecordId: userRecordId ?? this.userRecordId,
       friends: friends ?? this.friends,
       faceIndex: faceIndex ?? this.faceIndex,
+      avatarOptions: avatarOptions ?? this.avatarOptions,
     );
   }
 
@@ -71,6 +78,7 @@ class UserModel {
       'userRecordId': userRecordId,
       'friends': friends,
       'faceIndex': faceIndex,
+      'avatarOptions': avatarOptions,
     };
   }
 }
