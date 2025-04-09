@@ -65,9 +65,9 @@ class _FriendPageState extends State<FriendPage> {
   }
 
   Color getCalorieColor(int calories) {
-    if (calories > 3080) {
+    if (calories > 700) {
       return Colors.red;
-    } else if (calories >= 2520) {
+    } else if (calories >= 300) {
       return Colors.green;
     } else {
       return Colors.orange;
@@ -199,7 +199,7 @@ class _FriendPageState extends State<FriendPage> {
                             ),
                             const SizedBox(width: 3),
                             Text(
-                              'CAL',
+                              'kcal',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[600],

@@ -26,9 +26,9 @@ class _CameraPageState extends State<CameraPage> {
   File? _imageFile;
 
   Color getCalorieColor(int calories) {
-    if (calories > 3080) {
+    if (calories > 700) {
       return Colors.red;
-    } else if (calories >= 2520) {
+    } else if (calories >= 300) {
       return Colors.green;
     } else {
       return Colors.orange;
@@ -439,21 +439,19 @@ class _CameraPageState extends State<CameraPage> {
                     icon: Icon(
                       Icons.refresh,
                       size: 20,
-                      color: const Color.fromARGB(255, 123, 7, 144),
+                      color: Color(0xFF191919),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[100],
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Color(0xFFF6F6F6),
+                      foregroundColor: Color(0xFF191919),
                       padding: const EdgeInsets.symmetric(
                         vertical: 10,
                         horizontal: 20,
                       ),
-                      minimumSize:
-                          Size.zero, // Allows button to shrink-wrap content
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colors.grey[300]!),
                       ),
-                      elevation: 2,
+                      side: BorderSide(color: Colors.black.withAlpha(50)),
                     ),
                     onPressed: () {
                       if (_imageFile != null) {
@@ -705,7 +703,7 @@ class _CameraPageState extends State<CameraPage> {
                               ),
                               const SizedBox(width: 4),
                               const Text(
-                                'Cal',
+                                'kcal',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
