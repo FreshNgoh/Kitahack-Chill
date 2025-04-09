@@ -76,7 +76,7 @@ class Bar extends StatelessWidget {
             // splashFactory: NoSplash.splashFactory,
             // overlayColor: MaterialStateProperty.all(Colors.transparent),
             dividerHeight: 0,
-            labelColor: Colors.blue,
+            labelColor: Color(0xFF191919),
             unselectedLabelColor: Colors.black54,
             indicatorColor: Colors.transparent,
             tabs: <Widget>[
