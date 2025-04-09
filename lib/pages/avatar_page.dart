@@ -657,7 +657,17 @@ class _AvatarPageState extends State<AvatarPage> {
                     right: 20,
                     child: FloatingActionButton(
                       onPressed: () {
-                        /* Add action */
+                        showModalBottomSheet(
+                          context: context,
+                          isDismissible: true,
+                          enableDrag: true,
+                          backgroundColor: Colors.white,
+                          isScrollControlled:
+                              true, // Allows the sheet to resize for keyboard
+                          builder: (BuildContext context) {
+                            return const InputBottomSheet();
+                          },
+                        );
                       },
                       backgroundColor: currentColor.withOpacity(0.7),
                       child: const Icon(
