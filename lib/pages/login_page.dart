@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoading = false;
+  final Random _random = Random();
   bool _isLogin = true;
   bool _obscurePassword = true;
   final GlobalKey _avatarKey = GlobalKey(); // Key for RepaintBoundary
@@ -40,6 +42,65 @@ class _LoginPageState extends State<LoginPage> {
       _passwordController.clear();
       _usernameController.clear();
     });
+  }
+
+  Future<Map<String, int>> _randomizeAvatar() async {
+    int? _accessoriesIndex;
+    int? _eyesIndex;
+    int? _eyebrowsIndex;
+    int? _faceIndex; // Fixed face for registration
+    int? _glassesIndex;
+    int? _hairIndex;
+    int? _mouthIndex;
+    int? _noseIndex;
+    int? _detailsIndex;
+    int? _festivalIndex; // Assuming these exist in NotionAvatarController
+
+    // Optionally, you might want to immediately trigger the first random avatar:
+    // _avatarController?.random();
+    const int accessoriesMax = 14;
+    const int eyesMax = 13;
+    const int eyebrowsMax = 15;
+    const int glassesMax = 14;
+    const int hairMax = 58;
+    const int mouthMax = 19;
+    const int noseMax = 13;
+    const int detailsMax = 13;
+    const int festivalMax = 2; // Example
+
+    _accessoriesIndex = _random.nextInt(accessoriesMax);
+    _eyesIndex = _random.nextInt(eyesMax);
+    _eyebrowsIndex = _random.nextInt(eyebrowsMax);
+    _faceIndex = 10; // Fixed face, to be follow the user database one
+    _glassesIndex = _random.nextInt(glassesMax);
+    _hairIndex = _random.nextInt(hairMax);
+    _mouthIndex = _random.nextInt(mouthMax);
+    _noseIndex = _random.nextInt(noseMax);
+    _detailsIndex = _random.nextInt(detailsMax);
+    _festivalIndex = _random.nextInt(festivalMax);
+
+    _avatarController?.setAccessories(_accessoriesIndex);
+    _avatarController?.setEyes(_eyesIndex);
+    _avatarController?.setEyebrows(_eyebrowsIndex);
+    _avatarController?.setFace(_faceIndex);
+    _avatarController?.setGlasses(_glassesIndex);
+    _avatarController?.setHair(_hairIndex);
+    _avatarController?.setMouth(_mouthIndex);
+    _avatarController?.setNose(_noseIndex);
+    _avatarController?.setDetails(_detailsIndex);
+    _avatarController?.setFestival(_festivalIndex);
+
+    return {
+      'accessoriesIndex': _accessoriesIndex,
+      'eyesIndex': _eyesIndex,
+      'eyebrowsIndex': _eyebrowsIndex,
+      'glassesIndex': _glassesIndex,
+      'hairIndex': _hairIndex,
+      'mouthIndex': _mouthIndex,
+      'noseIndex': _noseIndex,
+      'detailsIndex': _detailsIndex,
+      'festivalIndex': _festivalIndex,
+    };
   }
 
   Future<void> _submit() async {
@@ -80,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
           final String uid = user.uid;
           await user.updateDisplayName(username);
 
-          _avatarController?.random();
+          final avatarIndices = await _randomizeAvatar();
 
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             final Uint8List? avatarBytes = await _captureAvatarAsBytes();
@@ -106,6 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                       imageUrl: avatarUrl,
                       userRecordId: "",
                       friends: [],
+                      avatarOptions: avatarIndices,
                     );
                     await _userService.addUser(newUser);
                     _showSuccess("Registration successful!");
@@ -311,7 +373,6 @@ class _LoginPageState extends State<LoginPage> {
               width: 100,
               height: 100,
               child: NotionAvatar(
-                useRandom: true,
                 onCreated: (controller) {
                   _avatarController = controller;
                 },
