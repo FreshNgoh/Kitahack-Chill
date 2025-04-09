@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application/models/user_record.dart';
 
 const String USER_RECORD_COLLECTION_REF = "user_records";
@@ -71,5 +72,17 @@ class UserRecordService {
       print("🔥 Error writing user record to Firestore: $e");
       print(stackTrace);
     }
+  }
+
+  Future<QuerySnapshot<UserRecord>> getUserRecordsForDateRange(
+    String uid,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    return await _userRecordRef
+        .where('userUid', isEqualTo: uid)
+        .where('createdAt', isGreaterThanOrEqualTo: startDate)
+        .where('createdAt', isLessThanOrEqualTo: endDate)
+        .get();
   }
 }
