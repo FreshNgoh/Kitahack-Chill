@@ -61,6 +61,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final listViewMaxHeight = screenHeight * 0.3;
+    final listViewMinHeight = screenHeight * 0.3;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -98,7 +99,10 @@ class _NutritionScreenState extends State<NutritionScreen> {
               ),
               const SizedBox(height: 10),
               ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: listViewMaxHeight),
+                constraints: BoxConstraints(
+                  maxHeight: listViewMaxHeight,
+                  minHeight: listViewMinHeight,
+                ),
                 child: StreamBuilder<QuerySnapshot<UserRecord>>(
                   stream: _userRecordService.getCurrentMonthUserRecords(
                     _currentUserId,
