@@ -23,6 +23,8 @@ class UserRecord {
         imageUrl: json['imageUrl']! as String,
         calories: json['calories']! as String,
         recommendation: json['recommendation'] as String?,
+        createdAt: json['createdAt'] as Timestamp,
+        updatedAt: json['updatedAt'] as Timestamp,
       );
 
   Map<String, Object?> toJson() {
