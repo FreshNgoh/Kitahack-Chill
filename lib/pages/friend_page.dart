@@ -218,7 +218,7 @@ class _FriendPageState extends State<FriendPage> {
                 child: Icon(
                   imageUrl != null
                       ? Icons.remove_red_eye_outlined
-                      : Icons.broken_image_outlined,
+                      : Icons.image_not_supported_outlined,
                   size: 20,
                   color: Colors.grey[600],
                 ),
