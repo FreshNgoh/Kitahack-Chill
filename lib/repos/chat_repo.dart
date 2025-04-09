@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_application/models/chat_message_model.dart';
-import 'package:flutter_application/utils/constants.dart';
+import 'package:flutter_application/utils/constant.dart';
 
 class ChatRepo {
   static chatIRecipeGenerationRepo(

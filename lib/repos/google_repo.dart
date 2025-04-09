@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_application/models/google_map_model.dart';
-import 'package:flutter_application/utils/constants.dart';
+import 'package:flutter_application/utils/constant.dart';
 
 class RestaurantRepo {
   Dio dio = Dio();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/bloc/google_map_bloc.dart';
 import 'package:flutter_application/services/location_handler.dart';
-import 'package:flutter_application/utils/constants.dart';
+import 'package:flutter_application/utils/constant.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 
