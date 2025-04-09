@@ -196,7 +196,6 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 
   void _randomizeAvatar() {
-    print("Randomizing avatar...");
     int? _accessoriesIndex;
     int? _eyesIndex;
     int? _eyebrowsIndex;
@@ -303,10 +302,8 @@ class _AvatarPageState extends State<AvatarPage> {
       }
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      print("Byte data: $byteData"); // Added log
       return byteData?.buffer.asUint8List();
     } catch (e) {
-      print("Error capturing avatar: $e");
       return null;
     }
   }
@@ -315,10 +312,9 @@ class _AvatarPageState extends State<AvatarPage> {
     setState(() {
       _isUploading = true;
     });
-    print("Uploading current avatar...");
+
     final Uint8List? avatarBytes = await _captureAvatarAsBytes();
     if (avatarBytes != null) {
-      print("Avatar bytes length: ${avatarBytes.length}");
       File? tempFile;
       try {
         final tempDir = await getTemporaryDirectory();
@@ -568,9 +564,6 @@ class _AvatarPageState extends State<AvatarPage> {
                                             builder: (context, setState) {
                                               return NotionAvatar(
                                                 onCreated: (controller) {
-                                                  print(
-                                                    "NotionAvatar controller created: $controller",
-                                                  );
                                                   _avatarController =
                                                       controller;
                                                   // Perform initial setup if needed
