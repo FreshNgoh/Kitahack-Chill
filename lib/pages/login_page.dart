@@ -1,9 +1,17 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_application/components/bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/user.dart';
 import "../services/user/user_service.dart";
+import 'package:flutter_notion_avatar/flutter_notion_avatar.dart';
+import 'package:flutter_application/services/storage/upload_service.dart';
+import 'package:flutter_notion_avatar/flutter_notion_avatar_controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,6 +30,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   bool _isLogin = true;
   bool _obscurePassword = true;
+  final GlobalKey _avatarKey = GlobalKey(); // Key for RepaintBoundary
+  NotionAvatarController? _avatarController; // To access the controller
 
   void _toggleTab(bool isLoginTab) {
     setState(() {
@@ -53,41 +63,117 @@ class _LoginPageState extends State<LoginPage> {
         if (_auth.currentUser != null) {
           print("User is logged in: ${_auth.currentUser?.email}");
           // Navigate to the home page
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Bar()),
-          );
+          if (mounted) {
+            // Check if the widget is still in the tree
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Bar()),
+            );
+          }
         }
       } else {
         UserCredential userCredential = await _auth
             .createUserWithEmailAndPassword(email: email, password: password);
 
-        String uid = userCredential.user!.uid;
-        await userCredential.user?.updateDisplayName(username);
+        final User? user = userCredential.user;
+        if (user != null) {
+          final String uid = user.uid;
+          await user.updateDisplayName(username);
 
-        try {
-          //Create user in Firestore
-          UserModel newUser = UserModel(
-            uid: uid,
-            username: username,
-            email: email,
-            userRecordId: "",
-            friends: [],
-          );
+          _avatarController?.random();
 
-          await _userService.addUser(newUser);
-        } catch (e) {
-          print("Error creating user in Firestore: $e");
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            final Uint8List? avatarBytes = await _captureAvatarAsBytes();
+
+            if (avatarBytes != null) {
+              File? tempFile;
+              try {
+                final tempDir = await getTemporaryDirectory();
+                tempFile = File(
+                  '${tempDir.path}/avatar_${DateTime.now().millisecondsSinceEpoch}.png',
+                );
+                await tempFile.writeAsBytes(avatarBytes);
+
+                final String? avatarUrl =
+                    await UploadService.uploadImageToFirebase(tempFile);
+
+                if (avatarUrl != null) {
+                  try {
+                    UserModel newUser = UserModel(
+                      uid: uid,
+                      username: username,
+                      email: email,
+                      imageUrl: avatarUrl,
+                      userRecordId: "",
+                      friends: [],
+                    );
+                    await _userService.addUser(newUser);
+                    _showSuccess("Registration successful!");
+                    // Do NOT redirect to Bar() here
+                    if (mounted) {
+                      setState(() {
+                        _isLogin = true; // Switch to the login tab
+                      });
+                    }
+                  } catch (e) {
+                    print("Error creating user in Firestore: $e");
+                    _showError("Error creating user profile.");
+                    await user.delete();
+                  }
+                } else {
+                  _showError("Failed to upload avatar.");
+                  await user.delete();
+                }
+              } catch (e) {
+                _showError("Error creating temporary avatar file.");
+                print("Error creating temporary file: $e");
+                await user.delete();
+              } finally {
+                await tempFile?.delete();
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              }
+            } else {
+              _showError("Failed to capture avatar.");
+              await user.delete();
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            }
+          });
+        } else {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
         }
-
-        _showSuccess("Registration successful!");
       }
     } on FirebaseAuthException catch (e) {
       _handleAuthError(e);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       _showError("Something went wrong. Please try again.");
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (_isLogin && mounted && _isLoading) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -127,6 +213,26 @@ class _LoginPageState extends State<LoginPage> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<Uint8List?> _captureAvatarAsBytes() async {
+    try {
+      final boundary =
+          _avatarKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      if (boundary == null) {
+        print("Error: RenderRepaintBoundary not found.");
+        return null;
+      }
+      final image = await boundary.toImage(
+        pixelRatio: 3.0,
+      ); // Adjust for quality
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print("Error capturing avatar: $e");
+      return null;
+    }
+  }
+
   Widget _buildLoginForm() {
     return Column(
       children: [
@@ -158,33 +264,58 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildRegisterForm() {
-    return Column(
+    return Stack(
       children: [
-        TextField(
-          controller: _usernameController,
-          decoration: const InputDecoration(labelText: "Username"),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _emailController,
-          decoration: const InputDecoration(labelText: "Email"),
-          keyboardType: TextInputType.emailAddress,
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _passwordController,
-          obscureText: _obscurePassword,
-          decoration: InputDecoration(
-            labelText: "Password",
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+        Column(
+          mainAxisSize:
+              MainAxisSize.min, // Ensure Column only takes necessary height
+          children: [
+            TextField(
+              controller: _usernameController,
+              decoration: const InputDecoration(labelText: "Username"),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: "Email"),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: "Password",
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
+            ),
+            const SizedBox(height: 20),
+            // No visible placeholder for the avatar anymore
+          ],
+        ),
+        Positioned(
+          left: -1000, // Position far off-screen to the left
+          top: 0,
+          child: RepaintBoundary(
+            key: _avatarKey,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: NotionAvatar(
+                useRandom: true,
+                onCreated: (controller) {
+                  _avatarController = controller;
+                },
+              ),
             ),
           ),
         ),
