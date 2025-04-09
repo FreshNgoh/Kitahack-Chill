@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_application/services/user/user_service.dart';
 import 'package:flutter_application/models/user.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -82,10 +84,91 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class ProfilePic extends StatelessWidget {
+class ProfilePic extends StatefulWidget {
   const ProfilePic({super.key, this.imageUrl});
 
   final String? imageUrl;
+
+  @override
+  State<ProfilePic> createState() => _ProfilePicState();
+}
+
+class _ProfilePicState extends State<ProfilePic> {
+  String? _localImageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _localImageUrl = widget.imageUrl;
+  }
+
+  Future<void> _saveImageToGallery() async {
+    if (_localImageUrl != null) {
+      var status = await Permission.storage.status;
+      if (!status.isGranted) {
+        status = await Permission.storage.request();
+        if (!status.isGranted) {
+          Fluttertoast.showToast(
+            msg: "Storage permission is required to save the image.",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.redAccent,
+            textColor: Colors.white,
+          );
+          return;
+        }
+      }
+
+      try {
+        final ByteData byteData = await NetworkAssetBundle(
+          Uri.parse(_localImageUrl!),
+        ).load(_localImageUrl!);
+        final Uint8List uint8List =
+            byteData.buffer.asUint8List(); // Get Uint8List from ByteData
+
+        var response = await ImageGallerySaver.saveImage(
+          uint8List,
+          quality: 60,
+          name: 'profile_avatar_${DateTime.now().millisecondsSinceEpoch}',
+        );
+
+        if (response != null && response['isSuccess']) {
+          Fluttertoast.showToast(
+            msg: "Image saved to gallery!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
+        } else {
+          Fluttertoast.showToast(
+            msg: "Failed to save image.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.redAccent,
+            textColor: Colors.white,
+          );
+        }
+      } catch (e) {
+        print("Error saving image: $e");
+        Fluttertoast.showToast(
+          msg: "An error occurred while saving the image.",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          textColor: Colors.white,
+        );
+      }
+    } else {
+      Fluttertoast.showToast(
+        msg: "No image to save.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.grey,
+        textColor: Colors.white,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,8 +182,8 @@ class ProfilePic extends StatelessWidget {
           CircleAvatar(
             backgroundColor: Colors.grey[100],
             backgroundImage:
-                imageUrl != null
-                    ? CachedNetworkImageProvider(imageUrl!)
+                _localImageUrl != null
+                    ? CachedNetworkImageProvider(_localImageUrl!)
                     : const AssetImage("assets/img/avatar.jpeg"),
           ),
           Positioned(
@@ -118,13 +201,31 @@ class ProfilePic extends StatelessWidget {
                   ),
                   backgroundColor: const Color(0xFFF5F6F9),
                 ),
-                onPressed: () {
-                  // To be implemented: open image picker or edit profile
+                onPressed: () async {
+                  // Request storage permission when the edit icon is pressed
+                  var status = await Permission.storage.status;
+                  if (!status.isGranted) {
+                    status = await Permission.storage.request();
+                    if (status.isGranted) {
+                      _saveImageToGallery(); // Save if permission is granted
+                    } else {
+                      Fluttertoast.showToast(
+                        msg:
+                            "Storage permission is required to save the image.",
+                        toastLength: Toast.LENGTH_LONG,
+                        gravity: ToastGravity.BOTTOM,
+                        backgroundColor: Colors.redAccent,
+                        textColor: Colors.white,
+                      );
+                    }
+                  } else {
+                    _saveImageToGallery(); // Save if permission is already granted
+                  }
                 },
-                child: Icon(
-                  Icons.camera_alt,
-                  //Black Icon
-                  color: const Color(0xFF757575),
+                child: const Icon(
+                  Icons
+                      .download, // Changed icon to download to reflect save action
+                  color: Color(0xFF757575),
                   size: 20,
                 ),
               ),
