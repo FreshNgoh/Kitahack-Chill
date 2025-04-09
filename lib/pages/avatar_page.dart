@@ -783,8 +783,8 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
   }
 
   Widget build(BuildContext context) {
-    final Color primaryColor = Colors.indigo;
-    final Color accentColor = Colors.indigoAccent;
+    final Color primaryColor = Colors.black87;
+    final Color accentColor = Colors.black54;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(
