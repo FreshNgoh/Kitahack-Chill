@@ -7,6 +7,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_application/models/user_exercise.dart';
+import 'package:flutter_application/models/user_record.dart';
+import 'package:flutter_application/services/user_record/user_record.dart';
+import 'package:flutter_application/services/user_services/user_service.dart';
 import 'package:flutter_notion_avatar/flutter_notion_avatar.dart';
 import 'package:flutter_notion_avatar/flutter_notion_avatar_controller.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,6 +30,8 @@ class _AvatarPageState extends State<AvatarPage> {
   NotionAvatarController? _avatarController;
   UserModel? _currentUser;
   final UserService _userService = UserService();
+  final ExerciseService _exerciseService = ExerciseService();
+  final UserRecordService _userRecordService = UserRecordService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey _avatarKey = GlobalKey();
   final Random _random = Random();
@@ -97,6 +103,116 @@ class _AvatarPageState extends State<AvatarPage> {
     }
   }
 
+  Future<void> _loadDailyCaloriesBurnt() async {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      final DateTime now = DateTime.now();
+      final DateTime startOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        0,
+        0,
+        0,
+      );
+      final DateTime endOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        23,
+        59,
+        59,
+      );
+
+      try {
+        final QuerySnapshot<UserExercise> snapshot = await _exerciseService
+            .getUserExercisesForDateRange(user.uid, startOfDay, endOfDay);
+
+        int totalBurnt = 0;
+        for (final doc in snapshot.docs) {
+          totalBurnt += doc.data().caloriesBurnt.toInt();
+        }
+
+        setState(() {
+          caloriesBurnt = totalBurnt;
+        });
+      } catch (e) {
+        print("Error fetching today's exercises: $e");
+        // Handle error appropriately
+      }
+    }
+  }
+
+  Future<void> _loadDailyCaloriesTaken() async {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      final DateTime now = DateTime.now();
+      final DateTime startOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        0,
+        0,
+        0,
+      );
+      final DateTime endOfDay = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        23,
+        59,
+        59,
+      );
+
+      try {
+        final QuerySnapshot<UserRecord> snapshot = await _userRecordService
+            .getUserRecordsForDateRange(user.uid, startOfDay, endOfDay);
+
+        double totalCaloriesTaken = 0;
+        for (final doc in snapshot.docs) {
+          final userRecord = doc.data();
+          if (userRecord != null && userRecord.calories != null) {
+            if (userRecord.calories is String) {
+              // Try parsing the string to a double
+              double? parsedCalories = double.tryParse(
+                userRecord.calories as String,
+              );
+              if (parsedCalories != null) {
+                totalCaloriesTaken += parsedCalories;
+              } else {
+                print(
+                  "Warning: Could not parse calories string: ${userRecord.calories}",
+                );
+                // Optionally handle the error, e.g., skip this record or set to 0
+              }
+            } else if (userRecord.calories is double) {
+              totalCaloriesTaken += userRecord.calories as double;
+            } else if (userRecord.calories is int) {
+              totalCaloriesTaken += (userRecord.calories as int).toDouble();
+            } else {
+              print(
+                "Warning: Unexpected type for calories: ${userRecord.calories.runtimeType}",
+              );
+              // Optionally handle unexpected types
+            }
+          }
+        }
+
+        setState(() {
+          caloriesTaken = totalCaloriesTaken.toInt();
+        });
+      } catch (e) {
+        print("Error fetching today's calorie records: $e");
+        // Handle error appropriately
+      }
+    }
+  }
+
+  Future<void> _refreshData() async {
+    await _loadDailyCaloriesBurnt();
+    await _loadDailyCaloriesTaken();
+  }
+
   Future<void> _updateAvatarBasedOnCalories() async {
     if (_currentUser != null) {
       final newFaceIndex = _getFaceIndexBasedOnCalories();
@@ -158,6 +274,8 @@ class _AvatarPageState extends State<AvatarPage> {
 
   Future<void> _loadCurrentUserAndUpdateAvatar() async {
     await _loadCurrentUser();
+    await _loadDailyCaloriesBurnt();
+    await _loadDailyCaloriesTaken();
     if (_currentUser?.avatarOptions != null &&
         _currentUser?.faceIndex != null) {
       _setAvatarFromCurrentUser();
@@ -665,7 +783,10 @@ class _AvatarPageState extends State<AvatarPage> {
                           isScrollControlled:
                               true, // Allows the sheet to resize for keyboard
                           builder: (BuildContext context) {
-                            return const InputBottomSheet();
+                            return InputBottomSheet(
+                              onExerciseSaved:
+                                  _refreshData, // Pass the callback
+                            );
                           },
                         );
                       },
@@ -736,7 +857,9 @@ class _AvatarPageState extends State<AvatarPage> {
 
 // Input Area start here
 class InputBottomSheet extends StatefulWidget {
-  const InputBottomSheet({super.key});
+  final Future<void> Function()? onExerciseSaved; // Callback function
+
+  const InputBottomSheet({Key? key, this.onExerciseSaved}) : super(key: key);
 
   @override
   _InputBottomSheetState createState() => _InputBottomSheetState();
@@ -744,19 +867,22 @@ class InputBottomSheet extends StatefulWidget {
 
 class _InputBottomSheetState extends State<InputBottomSheet> {
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _exerciseController =
-      TextEditingController(); // New controller
   final TextEditingController _durationController = TextEditingController();
   final TextEditingController _energyController = TextEditingController();
-
+  final TextEditingController _weightController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  Exercise? _selectedExercise; // Make it nullable initially
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ExerciseService _exerciseService = ExerciseService();
 
   @override
   void dispose() {
     _titleController.dispose();
     _durationController.dispose();
     _energyController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
@@ -780,6 +906,84 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
     if (picked != null && picked != _selectedTime) {
       setState(() => _selectedTime = picked);
     }
+  }
+
+  Future<void> _saveExercise() async {
+    final String title = _titleController.text.trim();
+    final String durationText = _durationController.text.trim();
+    final String energyText = _energyController.text.trim();
+    final String weightText = _weightController.text.trim();
+
+    if (title.isEmpty ||
+        _selectedExercise == null ||
+        _selectedDate == null ||
+        _selectedTime == null ||
+        weightText.isEmpty ||
+        durationText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields.')),
+      );
+      return;
+    }
+
+    final int duration = int.tryParse(durationText) ?? 0;
+    final double? manualCalories = double.tryParse(energyText);
+    final double weight = double.tryParse(weightText) ?? 70.0; // Default weight
+    final DateTime combinedDateTime = DateTime(
+      _selectedDate!.year,
+      _selectedDate!.month,
+      _selectedDate!.day,
+      _selectedTime!.hour,
+      _selectedTime!.minute,
+    );
+
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      double caloriesBurnt;
+
+      if (manualCalories != null) {
+        caloriesBurnt = manualCalories;
+      } else {
+        caloriesBurnt = _calculateCaloriesBurnt(
+          exercise: _selectedExercise!,
+          duration: duration,
+          weight: weight,
+        );
+      }
+
+      final UserExercise newExercise = UserExercise(
+        uid: user.uid,
+        title: title,
+        exerciseName: _selectedExercise!,
+        duration: duration,
+        caloriesBurnt: caloriesBurnt,
+        timestamp: combinedDateTime,
+      );
+
+      try {
+        await _exerciseService.saveExercise(newExercise);
+        Navigator.pop(context);
+        if (widget.onExerciseSaved != null) {
+          widget.onExerciseSaved!();
+        }
+      } catch (e) {
+        print('Error saving exercise: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to save exercise.')),
+        );
+      }
+    }
+  }
+
+  // Logic to calculate calories burnt using Exercise enum
+  double _calculateCaloriesBurnt({
+    required Exercise exercise,
+    required int duration,
+    required double weight,
+  }) {
+    final double metValue = exercise.metValue;
+    final double caloriesPerMinute = (metValue * 3.5 * weight) / 200;
+    return caloriesPerMinute * duration;
   }
 
   Widget build(BuildContext context) {
@@ -807,10 +1011,7 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // const Icon(Icons.fitness_center, size: 40, color: Colors.blueGrey),
             const SizedBox(height: 20),
-
-            // Title input
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
@@ -825,12 +1026,8 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
                 prefixIcon: Icon(Icons.title, color: accentColor),
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // Exercise input
-            TextField(
-              controller: _exerciseController,
+            DropdownButtonFormField<Exercise>(
               decoration: InputDecoration(
                 labelText: 'Exercise',
                 labelStyle: TextStyle(color: accentColor),
@@ -840,16 +1037,27 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                hintText: 'e.g., Morning Jog, Weight Training',
                 prefixIcon: Icon(Icons.directions_run, color: accentColor),
               ),
+              value: _selectedExercise,
+              items:
+                  Exercise.values.map((Exercise value) {
+                    return DropdownMenuItem<Exercise>(
+                      value: value,
+                      child: Text(
+                        value.name.toUpperCase(),
+                      ), // Display enum name
+                    );
+                  }).toList(),
+              onChanged: (Exercise? newValue) {
+                setState(() {
+                  _selectedExercise = newValue;
+                });
+              },
             ),
-
             const SizedBox(height: 20),
-
             Row(
               children: [
-                // Date picker
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: Icon(Icons.calendar_today, color: Colors.white),
@@ -869,10 +1077,7 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
                     onPressed: _selectDate,
                   ),
                 ),
-
                 const SizedBox(width: 15),
-
-                // Time picker
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: Icon(Icons.access_time, color: Colors.white),
@@ -894,10 +1099,7 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
-
-            // Duration input
             TextField(
               controller: _durationController,
               keyboardType: TextInputType.number,
@@ -914,15 +1116,12 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
                 suffixText: 'min',
               ),
             ),
-
             const SizedBox(height: 20),
-
-            //  Energy Expended input
             TextField(
               controller: _energyController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Energy Expended',
+                labelText: 'Energy Expended (Optional)',
                 labelStyle: TextStyle(color: accentColor),
                 filled: true,
                 fillColor: Colors.grey.shade50,
@@ -937,10 +1136,24 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
                 suffixText: 'kcal',
               ),
             ),
-
+            const SizedBox(height: 20),
+            TextField(
+              controller: _weightController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Weight',
+                labelStyle: TextStyle(color: accentColor),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                prefixIcon: Icon(Icons.accessibility_new, color: accentColor),
+                suffixText: 'kg',
+              ),
+            ),
             const SizedBox(height: 30),
-
-            //  Save Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
@@ -950,9 +1163,7 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
                 ),
                 elevation: 3,
               ),
-              onPressed: () {
-                // Save logic
-              },
+              onPressed: _saveExercise,
               child: const Text(
                 'SAVE WORKOUT',
                 style: TextStyle(
