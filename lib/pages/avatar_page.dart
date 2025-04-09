@@ -75,9 +75,9 @@ class _AvatarPageState extends State<AvatarPage> {
   }
 
   Color getCalorieColor(int calories) {
-    if (calories > 3080) {
+    if (calories > 700) {
       return Colors.red[400]!;
-    } else if (calories >= 2520) {
+    } else if (calories >= 400) {
       return Colors.orange[400]!;
     } else {
       return Colors.green[400]!;
@@ -987,8 +987,8 @@ class _InputBottomSheetState extends State<InputBottomSheet> {
   }
 
   Widget build(BuildContext context) {
-    final Color primaryColor = Colors.indigo;
-    final Color accentColor = Colors.indigoAccent;
+    final Color primaryColor = Colors.black87;
+    final Color accentColor = Colors.black54;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(

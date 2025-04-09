@@ -57,6 +57,16 @@ class _NutritionScreenState extends State<NutritionScreen> {
     });
   }
 
+  Color getCalorieColor(int calories) {
+    if (calories > 700) {
+      return Colors.red;
+    } else if (calories >= 300) {
+      return Colors.green;
+    } else {
+      return Colors.orange;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -80,6 +90,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
                     onPressed: () => _changeMonth(-1),
+                    color: Colors.grey,
                   ),
                   Text(
                     DateFormat(
@@ -88,16 +99,17 @@ class _NutritionScreenState extends State<NutritionScreen> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Color(0xFF191919),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
                     onPressed: () => _changeMonth(1),
+                    color: Colors.grey,
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 7),
               ConstrainedBox(
                 constraints: BoxConstraints(
                   maxHeight: listViewMaxHeight,
@@ -120,8 +132,19 @@ class _NutritionScreenState extends State<NutritionScreen> {
                     }
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Center(
-                        child: Text("No records for this month."),
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.hourglass_empty_rounded,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text("No records for this month."),
+                          ],
+                        ),
                       );
                     }
 
@@ -135,20 +158,102 @@ class _NutritionScreenState extends State<NutritionScreen> {
                       itemCount: records.length,
                       itemBuilder: (context, index) {
                         final record = records[index];
+                        final calorieColor = getCalorieColor(
+                          int.tryParse(record.calories) ?? 0,
+                        );
                         return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            leading: Image.network(
-                              record.imageUrl ?? '',
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                            ),
-                            title: Text("${record.calories} CAL"),
-                            subtitle: Text(record.recommendation ?? ''),
-                            trailing: Text(
-                              "${record.createdAt?.toDate().day}/${record.createdAt?.toDate().month}",
-                              style: const TextStyle(fontSize: 12),
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 2,
+                          ),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          color: Color(0xFFF6F6F6),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Image
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    record.imageUrl ?? '',
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.broken_image,
+                                              size: 60,
+                                            ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Text Content
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Calories
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.local_fire_department,
+                                            color: calorieColor,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            record.calories,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: calorieColor,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            'kcal',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      // Recommendation
+                                      Text(
+                                        record.recommendation ?? '',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Date
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${record.createdAt?.toDate().day}/${record.createdAt?.toDate().month}",
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -170,7 +275,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                     : _buildImagePreviewSection(),
               ],
               if (_showRestaurantSection)
-                const SizedBox(height: 270, child: RestaurantScreen()),
+                const SizedBox(height: 280, child: RestaurantScreen()),
             ],
           ),
         ),
@@ -180,43 +285,39 @@ class _NutritionScreenState extends State<NutritionScreen> {
 
   Widget _buildActionButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 25),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       child: Row(
         children: [
           Expanded(
-            child: ElevatedButton.icon(
-              icon: Icon(
-                Icons.restaurant_menu,
-                size: 20,
-                color:
-                    _showCookSection
-                        ? Colors.white
-                        : const Color.fromARGB(255, 123, 7, 144),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    _showCookSection ? Colors.blue : Colors.grey[100],
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(
-                    color: _showCookSection ? Colors.blue : Colors.grey[300]!,
+            child: Expanded(
+              child: ElevatedButton.icon(
+                icon: Icon(
+                  Icons.restaurant_menu,
+                  size: 20,
+                  color: _showCookSection ? Colors.white : Colors.black,
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      _showCookSection ? Color(0xFF191919) : Color(0xFFF6F6F6),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Colors.grey.shade400, width: 1),
                   ),
                 ),
-                elevation: 2,
-              ),
-              onPressed: () {
-                setState(() {
-                  _showCookSection = true;
-                  _showRestaurantSection = false;
-                });
-              },
-              label: Text(
-                'Cook',
-                style: TextStyle(
-                  color: _showCookSection ? Colors.white : Colors.black87,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                onPressed: () {
+                  setState(() {
+                    _showCookSection = true;
+                    _showRestaurantSection = false;
+                  });
+                },
+                label: Text(
+                  'Cook',
+                  style: TextStyle(
+                    color: _showCookSection ? Colors.white : Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
@@ -227,23 +328,17 @@ class _NutritionScreenState extends State<NutritionScreen> {
               icon: Icon(
                 Icons.storefront,
                 size: 20,
-                color:
-                    _showRestaurantSection
-                        ? Colors.white
-                        : const Color.fromARGB(255, 123, 7, 144),
+                color: _showRestaurantSection ? Colors.white : Colors.black,
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    _showRestaurantSection ? Colors.blue : Colors.grey[100],
+                    _showRestaurantSection
+                        ? Color(0xFF191919)
+                        : Color(0xFFF6F6F6),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(
-                    color:
-                        _showRestaurantSection
-                            ? Colors.blue
-                            : Colors.grey[300]!,
-                  ),
+                  side: BorderSide(color: Colors.grey.shade400, width: 1),
                 ),
               ),
               onPressed: () {
@@ -255,9 +350,9 @@ class _NutritionScreenState extends State<NutritionScreen> {
               label: Text(
                 'Restaurant',
                 style: TextStyle(
-                  color: _showRestaurantSection ? Colors.white : Colors.black87,
+                  color: _showRestaurantSection ? Colors.white : Colors.black,
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -297,13 +392,13 @@ class _NutritionScreenState extends State<NutritionScreen> {
           child: OutlinedButton.icon(
             icon: const Icon(Icons.upload_rounded, size: 20),
             style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.blue,
+              backgroundColor: Color(0xFFF6F6F6),
+              foregroundColor: Color(0xFF191919),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              side: BorderSide(color: Colors.blue.withAlpha(60)),
+              side: BorderSide(color: Colors.black.withAlpha(50)),
             ),
             onPressed: () {
               _pickImageFromGallery();
@@ -378,13 +473,12 @@ class _NutritionScreenState extends State<NutritionScreen> {
         const SizedBox(height: 24),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Color(0xFF191919),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
             ),
             elevation: 4,
-            shadowColor: Colors.blue[100],
           ),
           onPressed: () {
             if (_selectedImage != null) {

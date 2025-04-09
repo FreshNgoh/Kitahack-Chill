@@ -65,9 +65,9 @@ class _FriendPageState extends State<FriendPage> {
   }
 
   Color getCalorieColor(int calories) {
-    if (calories > 3080) {
+    if (calories > 700) {
       return Colors.red;
-    } else if (calories >= 2520) {
+    } else if (calories >= 300) {
       return Colors.green;
     } else {
       return Colors.orange;
@@ -199,7 +199,7 @@ class _FriendPageState extends State<FriendPage> {
                             ),
                             const SizedBox(width: 3),
                             Text(
-                              'CAL',
+                              'kcal',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[600],
@@ -218,7 +218,7 @@ class _FriendPageState extends State<FriendPage> {
                 child: Icon(
                   imageUrl != null
                       ? Icons.remove_red_eye_outlined
-                      : Icons.broken_image_outlined,
+                      : Icons.image_not_supported_outlined,
                   size: 20,
                   color: Colors.grey[600],
                 ),
