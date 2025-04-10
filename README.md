@@ -27,25 +27,31 @@ touch firebase_option.dart
 
 TO ADD FIREBASE CREDENTIALS
 
-a.Install firebase-tools cli globally
+a. Install firebase-tools cli globally
 
 ```
 npm install -g firebase-tools
 ```
 
-b.Install flutterfire cli
+b. Log In Firebase
+
+```
+firebase login
+```
+
+c. Install flutterfire cli
 
 ```
 dart pub global activate flutterfire_cli
 ```
 
-c. Configure the firebase credentails
+d. Configure the firebase credentails
 
 ```
 flutterfire configure
 ```
 
-More configuration can refer [https://firebase.flutter.dev/docs/cli/]
+More configuration can refer [https://firebase.google.com/docs/flutter/setup]
 
 3. Create collections in firestore database
 
