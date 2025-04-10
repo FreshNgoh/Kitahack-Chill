@@ -1,7 +1,9 @@
 ## 🍽️ EatMeh – AI-Powered Calorie Tracking with Friends
+
 EatMeh is a mobile application designed to help users effortlessly track their daily calorie intake using AI-powered food scanning while staying connected with friends for support and motivation. Built with Flutter and integrated with Gemini AI and Firebase, EatMeh promotes healthier eating habits and social accountability, making nutrition tracking easier, smarter, and more engaging.
 
 🧠 What Can EatMeh Do?
+
 1. 📷 Scan Your Meals – Use your phone’s camera to scan your food. Gemini AI will automatically recognize the ingredients and estimate the calorie content.
 
 2. 🧾 Track Calorie Intake – Easily view and manage your daily food records with real-time calorie information.
@@ -13,10 +15,49 @@ EatMeh is a mobile application designed to help users effortlessly track their d
 ## 🧑‍💻 Getting Started
 
 1. Running `flutter pub get` and `flutter packages get` in terminal
-2. Select your prefer simulator (Andriod, iOS)
-3. Run the app on **main.dart**
+2. Add Your Gemini API and Firebase Credentials under libs/utils, refer to to constant_example.dart and firebase_option_example.dart
+
+TO DO SO
+
+```
+cd libs/utils
+touch constant.dart
+touch firebase_option.dart
+```
+
+TO ADD FIREBASE CREDENTIALS
+
+a.Install firebase-tools cli globally
+
+```
+npm install -g firebase-tools
+```
+
+b.Install flutterfire cli
+
+```
+dart pub global activate flutterfire_cli
+```
+
+c. Configure the firebase credentails
+
+```
+flutterfire configure
+```
+
+More configuration can refer [https://firebase.flutter.dev/docs/cli/]
+
+3. Select your prefer simulator (Andriod, iOS)
+4. Run the app on **main.dart**
+
    - Mac: `command` + `shit` + `F5`
    - Andriod: `F5`
+
+   OR
+
+   ```
+   flutter run --debug
+   ```
 
 ## 📁 Project File Structure
 
@@ -35,6 +76,7 @@ EatMeh is a mobile application designed to help users effortlessly track their d
 `lib/main.dart` – The entry point of the app. This is where the app starts and is configured, including theme, routes, and initializations.
 
 ## Pubspec.yaml
+
 1. To add new packages, start from `line 29: dependencies`
 2. To add assests to this application, add an assests section start from `line 84: assests`
 3. To add custom fonts to this application, add a fonts section start from `line 100: fonts`
