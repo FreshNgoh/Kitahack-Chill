@@ -15,12 +15,12 @@ EatMeh is a mobile application designed to help users effortlessly track their d
 ## 🧑‍💻 Getting Started
 
 1. Running `flutter pub get` and `flutter packages get` in terminal
-2. Add Your Gemini API and Firebase Credentials under libs/utils, refer to to constant_example.dart and firebase_option_example.dart
+2. Add Your Gemini API and Firebase Credentials under lib/utils, refer to to constant_example.dart and firebase_option_example.dart
 
 TO DO SO
 
 ```
-cd libs/utils
+cd lib/utils
 touch constant.dart
 touch firebase_option.dart
 ```
