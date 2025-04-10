@@ -47,8 +47,14 @@ flutterfire configure
 
 More configuration can refer [https://firebase.flutter.dev/docs/cli/]
 
-3. Select your prefer simulator (Andriod, iOS)
-4. Run the app on **main.dart**
+3. Create collections in firestore database
+
+```
+users, user_records, user_exercise, friend_requests
+```
+
+4. Select your prefer simulator (Andriod, iOS)
+5. Run the app on **main.dart**
 
    - Mac: `command` + `shit` + `F5`
    - Andriod: `F5`
@@ -80,3 +86,13 @@ More configuration can refer [https://firebase.flutter.dev/docs/cli/]
 1. To add new packages, start from `line 29: dependencies`
 2. To add assests to this application, add an assests section start from `line 84: assests`
 3. To add custom fonts to this application, add a fonts section start from `line 100: fonts`
+
+## DEBUG
+
+If you encounter error like
+
+```
+[cloud_firestore/failed-precondition] The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/eat-meh-kitahack/firestore/indexes?create_composite=ClVwcm9qZWN0cy9lYXQtbWVoLWtpdGFoYWNrL2RhdGFiYXNlcy8oZGVmYXVsdCkvY29sbGVjdGlvbkdyb3Vwcy91c2VyX3JlY29yZHMvaW5kZXhlcy9fEAEaCwoHdXNlclVpZBABGg0KCWNyZWF0ZWRBdBABGgwKCF9fbmFtZV9fEAE
+```
+
+Kindly click into the link to create query indexes
